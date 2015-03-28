@@ -16,7 +16,6 @@ window.onload = function () {
         soundfontUrl: "./soundfont/",
         instrument: "acoustic_grand_piano",
         onprogress: function(state, progress) {
-            console.log(state, progress);
         },
         onsuccess: function() {
           var delay = 0; // play one note every quarter second
@@ -34,7 +33,15 @@ window.onload = function () {
           var pattern7 = deserializePattern(patternsRaw[6]);
           var pattern8 = deserializePattern(patternsRaw[7]);
           var pattern9 = deserializePattern(patternsRaw[8]);
+          var pattern10 = deserializePattern(patternsRaw[9]);
           var silence34 = pattern9;
+          var silence44 = pattern10;
+
+/*          pattern6 = pattern5;
+          pattern7 = pattern1;
+          pattern8 = pattern3;
+          silence34 = silence44;
+*/
 
           var left = new Line();
           var right = new Line();
@@ -46,7 +53,7 @@ window.onload = function () {
           }
 
           for (var i = 0; i < 2; i++) {
-            for (var j = 0; j < 2; j++) {
+            for (var j = 0; j < 1; j++) {
               addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
               addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
               addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
@@ -59,9 +66,13 @@ window.onload = function () {
             addLeftRightPattern(2, pattern6, pattern7, "C", "M", 0);
             addLeftRightPattern(2, pattern6, pattern7, "A", "M", 0);
 
-            addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+            for (var j = 0; j < 1; j++) {
+              addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+              addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+              addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
+            }
 
-            for (var j = 0; j < 2; j++) {
+            for (var j = 0; j < 4; j++) {
               addLeftRightPattern(2, pattern6, pattern7, "D", "M", 0);
               addLeftRightPattern(1, pattern6, pattern7, "F#", "M", 0);
               addLeftRightPattern(1, pattern6, pattern7, "F#", "7", 0);

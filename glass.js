@@ -83,7 +83,7 @@ var patternsRaw = [
             [3, -5], [3, -3], [3, 0],
             [3, -5], [3, -3], [3, 0],
             [3, -5], [3, -3], [3, 0]]],
-  [44, -1, [[8, [0, 2]], [8, 4],
+  [44, -2, [[8, [0, 2]], [8, 4],
            [8, [0, 2]], [8, 4],
            [8, [0, 2]], [8, 4],
            [8, [0, 2]], [8, 4],
@@ -96,7 +96,8 @@ var patternsRaw = [
            [45, [0, 2, 4]]
           ]],
   [34, -3, [[30, [0, 7]]]],
-  [34, 0, [[30, -1]]], // rest
+  [34, 0, [[30, -1]]], // 3/4 rest
+  [44, 0, [[1, -1]]], // 4/4 rest
 ];
 
 /* noteLen:
@@ -254,7 +255,7 @@ Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octa
 function playNote(note, time, len, velocity) {
   setTimeout(function() {
     MIDI.noteOn(0, note, velocity, 0);
-    var decay = 50;
+    var decay = 15;
     MIDI.noteOff(0, note, velocity, len + decay);
   }, time);
 }
