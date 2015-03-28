@@ -21,7 +21,7 @@ window.onload = function () {
         onsuccess: function() {
           var delay = 0; // play one note every quarter second
           var velocity = 127; // how hard the note hits
-          var tempo = 100;
+          var tempo = 160;
           // play the note
           MIDI.setVolume(0, 127);
 
@@ -29,32 +29,45 @@ window.onload = function () {
           var pattern2 = deserializePattern(patternsRaw[1]);
           var pattern3 = deserializePattern(patternsRaw[2]);
           var pattern4 = deserializePattern(patternsRaw[3]);
+          var pattern5 = deserializePattern(patternsRaw[4]);
+          var pattern6 = deserializePattern(patternsRaw[5]);
+          var pattern7 = deserializePattern(patternsRaw[6]);
+          var pattern8 = deserializePattern(patternsRaw[7]);
+          var pattern9 = deserializePattern(patternsRaw[8]);
+          var silence34 = pattern9;
 
           var left = new Line();
           var right = new Line();
 
-          for (var i = 0; i < 3; i++) {
-            left.addPattern(pattern4, "A", "m", -1);
-            right.addPattern(pattern1, "A", "m", 1);
-            left.addPattern(pattern2, "A", "m", -1);
-            right.addPattern(pattern1, "A", "m", 1);
+          function addLeftRightPattern(repeats, leftPattern, rightPattern,
+                                       noteBase, scaleType, octaveOffset) {
+            left.addPattern(repeats, leftPattern, noteBase, scaleType, octaveOffset);
+            right.addPattern(repeats, rightPattern, noteBase, scaleType, octaveOffset);
           }
 
           for (var i = 0; i < 2; i++) {
-            left.addPattern(pattern1, "F", "m", 0);
-            left.addPattern(pattern1, "C", "m", 0);
-            left.addPattern(pattern1, "Ab", "M", 0);
-            left.addPattern(pattern1, "C", "m", 0);
-          }
+            for (var j = 0; j < 2; j++) {
+              addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+              addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+              addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
+            }
 
-          right.addPattern(pattern2, "F", "m", 0);
-          right.addPattern(pattern2, "C", "m", 0);
-          right.addPattern(pattern2, "Ab", "M", 0);
-          right.addPattern(pattern2, "C", "m", 0);
-          right.addPattern(pattern3, "F", "m", 0);
-          right.addPattern(pattern2, "C", "m", 0);
-          right.addPattern(pattern2, "Ab", "M", 0);
-          right.addPattern(pattern2, "C", "m", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "D", "m", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "D", "mM", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "G", "m", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "Eb", "M", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "C", "M", 0);
+            addLeftRightPattern(2, pattern6, pattern7, "A", "M", 0);
+
+            addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+
+            for (var j = 0; j < 2; j++) {
+              addLeftRightPattern(2, pattern6, pattern7, "D", "M", 0);
+              addLeftRightPattern(1, pattern6, pattern7, "F#", "M", 0);
+              addLeftRightPattern(1, pattern6, pattern7, "F#", "7", 0);
+              addLeftRightPattern(4, pattern6, pattern7, "D", "M", 0);
+            }
+          }
 
           left.play(tempo);
           right.play(tempo);
