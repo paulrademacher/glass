@@ -45,7 +45,7 @@ function deserializePattern(array) {
    scaleType is 'm' or 'M' */
 function scaleNumToNoteNum(scaleType, num) {
   var mappings = {
-    'm': [0, 2, 3, 5, 7, 9, 11],
+    'm': [0, 2, 3, 5, 7, 9, 10],
     'M': [0, 2, 4, 5, 7, 9, 11]
   };
 
@@ -62,16 +62,21 @@ function scaleNumToNoteNum(scaleType, num) {
   }
 
   var note = mappings[scaleType][adjustedNum] + octaveOffset;
-  console.log(".", note, num, adjustedNum);
 
   return note;
 }
 
 var patternsRaw = [
-    [44, -1, [[3, -3], [3, 0], [3, 2],
-              [3, -3], [3, 0], [3, 2],
-              [3, -3], [3, 0], [3, 2],
-              [3, -3], [3, 0], [3, 2]]],
+  [44, -1, [[3, -3], [3, 0], [3, 2],
+            [3, -3], [3, 0], [3, 2],
+            [3, -3], [3, 0], [3, 2],
+            [3, -3], [3, 0], [3, 2]]],
+  [44, 0, [[8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2]]],
+  [44, -2, [[1, 0]]],
+  [44, -1, [[3, -5], [3, -3], [3, 0],
+            [3, -5], [3, -3], [3, 0],
+            [3, -5], [3, -3], [3, 0],
+            [3, -5], [3, -3], [3, 0]]]
 ];
 
 /*
@@ -85,13 +90,39 @@ function noteLenToMs(tempo, noteLen) {
     return quarter;
   } if (noteLen == 8) {
     return quarter / 2;
+  } if (noteLen == 1) {
+    return quarter * 4;
+  } if (noteLen == 2) {
+    return quarter * 2;
   } if (noteLen == 3) {
     return quarter / 3;
   }
 }
 
 function Line() {
-  var notes = [];
+  this.notes = [];
+}
+
+Line.prototype.play = function(tempo) {
+  var time = 0;
+  for (var i = 0; i < this.notes.length; i++) {
+    var note = this.notes[i].num;
+    var len = this.notes[i].len;
+    var ms = noteLenToMs(tempo, len);
+    playNote(note, time, time + ms);
+    time += ms;
+  }
+};
+
+/* noteBase is a plain note string (e.g., "C") */
+Line.prototype.addPattern = function(pattern, noteBase, scaleType, octaveOffset) {
+  var note = MIDI.keyToNote[noteBase + (5 + pattern.startOctave + octaveOffset)];
+
+  for (var i = 0; i < pattern.notes.length; i++) {
+    var num = pattern.notes[i].num;
+    var len = pattern.notes[i].len;
+    this.notes.push(new Note(len, note + scaleNumToNoteNum(scaleType, num)));
+  }
 }
 
 function playNote(note, time, len) {
@@ -99,7 +130,4 @@ function playNote(note, time, len) {
     MIDI.noteOn(0, note, 127, 0);
     MIDI.noteOff(0, note, 127, 0 + len);
   }, time);
-}
-
-function playLine(line) {
 }

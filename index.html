@@ -11,10 +11,6 @@
 <body>
 <script type="text/javascript">
 
-function M(noteString) {
-    return MIDIUtils.noteNameToNoteNumber(noteString);
-}
-
 window.onload = function () {
     MIDI.loadPlugin({
         soundfontUrl: "./soundfont/",
@@ -23,32 +19,45 @@ window.onload = function () {
             console.log(state, progress);
         },
         onsuccess: function() {
-            var delay = 0; // play one note every quarter second
-            var note = M("F-4"); // the MIDI note
-            var velocity = 127; // how hard the note hits
-          var tempo = 120;
-            // play the note
-            MIDI.setVolume(0, 127);
+          var delay = 0; // play one note every quarter second
+          var velocity = 127; // how hard the note hits
+          var tempo = 100;
+          // play the note
+          MIDI.setVolume(0, 127);
 
-          var pattern = deserializePattern(patternsRaw[0]);
-          var time = 0;
+          var pattern1 = deserializePattern(patternsRaw[0]);
+          var pattern2 = deserializePattern(patternsRaw[1]);
+          var pattern3 = deserializePattern(patternsRaw[2]);
+          var pattern4 = deserializePattern(patternsRaw[3]);
 
-          var line = new Line();
-          for (var i = 0; i < pattern.notes.length; i++) {
-            var num = pattern.notes[i].num;
-            var len = pattern.notes[i].len;
-            var ms = noteLenToMs(tempo, len);
-            playNote(note + scaleNumToNoteNum('m', num), time, time + ms);
-            time += ms;
+          var left = new Line();
+          var right = new Line();
+
+          for (var i = 0; i < 3; i++) {
+            left.addPattern(pattern4, "A", "m", -1);
+            right.addPattern(pattern1, "A", "m", 1);
+            left.addPattern(pattern2, "A", "m", -1);
+            right.addPattern(pattern1, "A", "m", 1);
           }
 
-          for (var i = 0; i < pattern.notes.length; i++) {
-            var num = pattern.notes[i].num;
-            var len = pattern.notes[i].len;
-            var ms = noteLenToMs(tempo, len);
-            playNote(note + scaleNumToNoteNum('m', num), time, time + ms);
-            time += ms;
+          for (var i = 0; i < 2; i++) {
+            left.addPattern(pattern1, "F", "m", 0);
+            left.addPattern(pattern1, "C", "m", 0);
+            left.addPattern(pattern1, "Ab", "M", 0);
+            left.addPattern(pattern1, "C", "m", 0);
           }
+
+          right.addPattern(pattern2, "F", "m", 0);
+          right.addPattern(pattern2, "C", "m", 0);
+          right.addPattern(pattern2, "Ab", "M", 0);
+          right.addPattern(pattern2, "C", "m", 0);
+          right.addPattern(pattern3, "F", "m", 0);
+          right.addPattern(pattern2, "C", "m", 0);
+          right.addPattern(pattern2, "Ab", "M", 0);
+          right.addPattern(pattern2, "C", "m", 0);
+
+          left.play(tempo);
+          right.play(tempo);
         }
     });
 };
