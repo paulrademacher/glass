@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <script src="MIDI.js"></script>
+    <script src="MIDIUtils.js"></script>
+
+    <script src="glass.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+
+function M(noteString) {
+    return MIDIUtils.noteNameToNoteNumber(noteString);
+}
+
+window.onload = function () {
+    MIDI.loadPlugin({
+        soundfontUrl: "./soundfont/",
+        instrument: "acoustic_grand_piano",
+        onprogress: function(state, progress) {
+            console.log(state, progress);
+        },
+        onsuccess: function() {
+            var delay = 0; // play one note every quarter second
+            var note = M("F-4"); // the MIDI note
+            var velocity = 127; // how hard the note hits
+          var tempo = 120;
+            // play the note
+            MIDI.setVolume(0, 127);
+
+          var pattern = deserializePattern(patternsRaw[0]);
+          var time = 0;
+
+          var line = new Line();
+          for (var i = 0; i < pattern.notes.length; i++) {
+            var num = pattern.notes[i].num;
+            var len = pattern.notes[i].len;
+            var ms = noteLenToMs(tempo, len);
+            playNote(note + scaleNumToNoteNum('m', num), time, time + ms);
+            time += ms;
+          }
+
+          for (var i = 0; i < pattern.notes.length; i++) {
+            var num = pattern.notes[i].num;
+            var len = pattern.notes[i].len;
+            var ms = noteLenToMs(tempo, len);
+            playNote(note + scaleNumToNoteNum('m', num), time, time + ms);
+            time += ms;
+          }
+        }
+    });
+};
+
+</script>
+</body>
+</html>
