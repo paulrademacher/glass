@@ -51,8 +51,8 @@ function scaleNumToNoteNum(scaleType, num) {
   var mappings = {
     'm':  [0, 2, 3, 5, 7, 9, 10],
     'M':  [0, 2, 4, 5, 7, 9, 11],
-    'mM': [11, 2, 3, 5, 7, 9, 0],  // minor-Maj7.  Note we swap root and 7th.
-    '7':  [10, 2, 4, 5, 7, 9, 0]  // Dom7.  Note we swap root and 7th.
+    'mM': [-1, 2, 3, 5, 7, 9, 0],  // minor-Maj7.  Note we swap root and 7th.
+    '7':  [-2, 2, 4, 5, 7, 9, 0]  // Dom7.  Note we swap root and 7th.
   };
 
   var octaveOffset = 0;
@@ -102,7 +102,7 @@ var patternsRaw = [
 
 /* noteLen:
    4 -> quarter note
-   8 -> eigth note
+   8 -> eighth note
    3 -> triplet note
    1 -> whole
    2 -> half
@@ -128,7 +128,28 @@ function noteLenToMs(tempo, noteLen) {
   }
 }
 
-function Line() {
+/* Convert a note length (1, 2, 4, etc) to an ABC note length, assuming
+   the ABC unit is an eighth note. */
+function noteLenToABC(noteLen) {
+  if (noteLen == 4) {
+    return "2";
+  } if (noteLen == 8) {
+    return "";
+  } if (noteLen == 1) {
+    return "8";
+  } if (noteLen == 45) {
+    return "3";
+  } if (noteLen == 30) {
+    return "6";
+  } if (noteLen == 2) {
+    return "4";
+  } if (noteLen == 3) {
+    return "";
+  }
+}
+
+function Line(timeSig) {
+  this.timeSig = timeSig;
   this.notes = [];
 
   // We remember the notes of each pattern to optimize the next one.
@@ -229,7 +250,7 @@ function noteStringToNum(noteString, octaveOffset) {
 Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset) {
   var note = noteStringToNum(noteBase, pattern.startOctave + octaveOffset);
 
-  this.optimizeChord(pattern, note, scaleType);
+  // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
 
   for (var r = 0; r < repeats; r++) {
     for (var i = 0; i < pattern.notes.length; i++) {
@@ -252,11 +273,116 @@ Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octa
   }
 };
 
+function midiNoteToABC(note) {
+  // This returns "A4", "C5", ...
+  var encoded = MIDI.noteToKey[note];
+
+  var octave = parseInt(encoded[encoded.length - 1]);
+  var noteStr = encoded.substr(0, encoded.length - 1);
+
+  if (noteStr[1] == 'b') {
+    noteStr = noteStr[0] + '_';
+  } else if (noteStr[1] == '#') {
+    noteStr = noteStr[0] + '^';
+  }
+
+  if (octave == 5) {
+    noteStr = noteStr.toLowerCase();
+  } else if (octave > 5) {
+    noteStr = noteStr.toLowerCase();
+    for (var i = 5; i < octave; i++) {
+      noteStr += "'";
+    }
+  } else {
+    for (var i = 3; i >= octave; i--) {
+      noteStr += ",";
+    }
+  }
+  return noteStr;
+}
+
+Line.prototype.toABC = function() {
+  var abc = "";
+  var s = [];
+
+  var isFirstNote = true;
+  var beats = 0;  // Number of beats so far.
+  var timeInMs = 0;  // Time, up to one measure.
+  var timeTotalInMs = 0;
+  for (var i = 0; i < this.notes.length; i++) {
+    if (timeTotalInMs > 20000) {
+      break;
+    }
+
+    var nums = this.notes[i].nums;
+    var len = this.notes[i].len;
+
+    if (parseInt(timeInMs) == 1000) {
+      timeInMs = 0;
+      beats++;
+    } else if (parseInt(timeInMs) == 2000) {
+      timeInMs = 0;
+      beats += 2;
+    } else if (parseInt(timeInMs) == 3000) {
+      timeInMs = 0;
+      beats += 3;
+    } else if (parseInt(timeInMs) == 4000) {
+      timeInMs = 0;
+      beats += 4;
+    } else if (parseInt(timeInMs) == 5000) {
+      timeInMs = 0;
+      beats += 5;
+    } else if (parseInt(timeInMs) == 6000) {
+      timeInMs = 0;
+      beats += 6;
+    }
+
+
+    if (timeInMs == 0) {
+      // Start bar?
+      if (!isFirstNote) {
+        if (this.timeSig == 34 && (beats % 3) == 0) {
+          s.push('|');
+        } else if (this.timeSig == 34 && (beats % 3) == 0) {
+          s.push('|');
+        }
+      }
+
+      s.push(' ');  // Start a new bracket.
+    }
+
+    timeInMs += noteLenToMs(60, len);
+    timeTotalInMs += noteLenToMs(60, len);
+
+    if (nums.length > 1) {
+      s.push('[');
+    }
+    for (var j = 0; j < nums.length; j++) {
+      if (nums[j] >= 0) {
+        abcNote = midiNoteToABC(nums[j]);
+      } else {
+        // Rest.
+        abcNote = 'z';
+      }
+      s.push(abcNote + noteLenToABC(len));
+      isFirstNote = false;
+    }
+    if (nums.length > 1) {
+      s.push(']');
+    }
+  }
+  s.push('|');
+
+  abc += s.join("");
+
+  return abc;
+};
+
 function playNote(note, time, len, velocity) {
   setTimeout(function() {
     MIDI.noteOn(0, note, velocity, 0);
-    var decay = 15;
-    MIDI.noteOff(0, note, velocity, len + decay);
+    var decay = 1;
+    MIDI.noteOff(0, note, velocity, decay);  // TODO: How does noteOff() actually work?
   }, time);
 }
 

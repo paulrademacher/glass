@@ -7,11 +7,13 @@
     <script src="MIDIUtils.js"></script>
 
     <script src="glass.js"></script>
+    <script src="abcjs_basic_1.10-min.js"></script>
 </head>
 <body>
 <script type="text/javascript">
 
 window.onload = function () {
+
     MIDI.loadPlugin({
         soundfontUrl: "./soundfont/",
         instrument: "acoustic_grand_piano",
@@ -43,8 +45,8 @@ window.onload = function () {
           silence34 = silence44;
 */
 
-          var left = new Line();
-          var right = new Line();
+          var left = new Line(34);
+          var right = new Line(34);
 
           function addLeftRightPattern(repeats, leftPattern, rightPattern,
                                        noteBase, scaleType, octaveOffset) {
@@ -80,12 +82,24 @@ window.onload = function () {
             }
           }
 
+          var doABCNotation = false;
+          if (doABCNotation) {
+            var abcLeft = left.toABC();
+            var abcRight = right.toABC();
+            var abc = "%%staves P1 P2\n";
+            abc += "V:P1\n" + abcRight + "\nV: P2 clef=bass\n" + abcLeft;
+            console.log(abc);
+
+            ABCJS.renderAbc('score', abc);
+          }
+
           left.play(tempo);
           right.play(tempo);
         }
     });
 };
-
 </script>
+
+<div id="score"></div>
 </body>
 </html>
