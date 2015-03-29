@@ -321,14 +321,16 @@ Sequence.prototype.renderIntoDiv = function($div) {
       var $notationParent = $("<div>").css("height", "80px").css("width", "300px").
         attr("id", patternInstance.id).addClass("patternInstance");
       var $notation = $("<div>");
-//      $notationParent.append($("<span>").html("x" + patternInstance.repeats).
-//                             css("font-style", "italic").css("float", "left"));
       $notationParent.append($notation);
       $sub.append($notationParent);
-      var abc = patternInstance.toABC();
+
+      var header = "%%staves P1\nV:P1 name=\"x" + patternInstance.repeats + "\"";
       if (patternInstance.pattern.startOctave < -1) {
-        abc = "%%staves P1\nV:P1 clef=bass\n"+ abc;
+        header += " clef=bass ";
       }
+      header += "\n";
+      var abc = header + patternInstance.toABC();
+
       var engraverParams = {
         "scale": .8,
         "staffwidth": 300,
@@ -596,9 +598,12 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
       if (noteStream.currentPatternId != "") {
         // Hide old highlight.
         $("#" + noteStream.currentPatternId).css("border", "1px solid white");
+        $("#" + noteStream.currentPatternId).css("background-color", "white");
       }
       // Highlight new.
-        $("#" + patternId).css("border", "1px solid blue");
+      $("#" + patternId).css("border", "1px solid blue");
+
+      $("#" + patternId + "").css("background-color", "#fcfcff");
       noteStream.currentPatternId = patternId;
     }
 
