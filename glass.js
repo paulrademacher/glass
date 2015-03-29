@@ -7,10 +7,24 @@ function Note(len, nums) {
   this.nums = nums;
 }
 
+function Score(timeSig) {
+  this.timeSig = timeSig;
+  this.left = new Line(timeSig);
+  this.right = new Line(timeSig);
+}
+
 function Pattern() {
   this.timeSig = 0;
   this.startOctave = 0;
   this.notes = [];
+}
+
+function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
+  this.repeats = repeats;
+  this.pattern = pattern;
+  this.noteBase = noteBase;
+  this.scaleType = scaleType;
+  this.octaveOffset = octaveOffset;
 }
 
 /* Serializes a Pattern to a plain array. */
@@ -43,6 +57,14 @@ function deserializePattern(array) {
   }
 
   return pattern;
+}
+
+function timeSigToBeats(timeSig) {
+  if (timeSig == 34) {
+    return 3;
+  } else if (timeSig == 44) {
+    return 4;
+  }
 }
 
 /* num is 0-7
@@ -151,11 +173,17 @@ function noteLenToABC(noteLen) {
 function Line(timeSig) {
   this.timeSig = timeSig;
   this.notes = [];
+  this.patternInstances = [];
 
   // We remember the notes of each pattern to optimize the next one.
   // This is maintained in sorted order.
   this.prevPatternNotes = [];
 }
+
+Score.prototype.play = function(tempo) {
+  this.left.play(tempo);
+  this.right.play(tempo);
+};
 
 Line.prototype.play = function(tempo) {
   var time = 0;
@@ -248,6 +276,11 @@ function noteStringToNum(noteString, octaveOffset) {
 
 /* noteBase is a plain note string (e.g., "C") */
 Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset) {
+  var patternInstance = new PatternInstance(repeats, pattern, noteBase,
+                                            scaleType, octaveOffset);
+
+  this.patternInstances.push(patternInstance);
+
   var note = noteStringToNum(noteBase, pattern.startOctave + octaveOffset);
 
   // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
@@ -409,3 +442,27 @@ function invert12(notes, direction) {
   }
   return notes;
 }
+
+Line.prototype.render = function($div) {
+  
+};
+
+Score.prototype.addRepeat = function(repeats) {
+};
+
+Score.prototype.render = function($div) {
+  // We assume left and right have same number of patterns.
+  var html = this.left.patternInstances.length + " " + this.right.patternInstances.length + "<BR>\n";
+
+  for (var i = 0; i < this.left.patternInstances.length; i++) {
+    for (var j = 0; j < this.left.patternInstances[i].repeats; j++) {
+      html += this.left.patternInstances[i].noteBase + " " + this.right.patternInstances[i].noteBase + "<BR>\n";
+    }
+  }
+
+  $div.html(html);
+};
+
+Pattern.prototype.render = function() {
+};
+
