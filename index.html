@@ -48,7 +48,7 @@ window.onload = function () {
         onsuccess: function() {
           var delay = 0; // play one note every quarter second
           var velocity = 127; // how hard the note hits
-          var tempo = 160;
+          var tempo = 170;
           // play the note
           MIDI.setVolume(0, 127);
 
@@ -63,6 +63,10 @@ window.onload = function () {
           var pattern9 = deserializePattern(patternsRaw[8]);
           var pattern10 = deserializePattern(patternsRaw[9]);
           var pattern11 = deserializePattern(patternsRaw[10]);
+          var pattern12 = deserializePattern(patternsRaw[11]);
+          var pattern13 = deserializePattern(patternsRaw[12]);
+          var pattern14 = deserializePattern(patternsRaw[13]);
+          var pattern15 = deserializePattern(patternsRaw[14]);
           var silence34 = pattern9;
           var silence44 = pattern10;
 
@@ -81,6 +85,22 @@ window.onload = function () {
             left.addPattern(repeats, leftPattern, noteBase, scaleType, octaveOffset);
             right.addPattern(repeats, rightPattern, noteBase, scaleType, octaveOffset);
           }
+
+          score.leftSeq.addPattern(8, pattern12, "D", "m", -1);
+          score.rightSeq.addPattern(4, silence44, "D", "m", -1);
+
+          score.leftSeq.addPattern(6, pattern12, "D", "m", -1);
+          score.rightSeq.addPattern(8, pattern13, "D", "m", -1);
+
+          score.multiSeq.addSequence(2, function(seq) {
+            seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
+            seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
+            seq.leftSeq.addPattern(6, pattern14, "Bb", "M", -1);
+            seq.rightSeq.addPattern(8, pattern15, "Bb", "M", -1);
+          });
+
+          score.leftSeq.addPattern(2, silence44, "D", "m", -1);
+          score.rightSeq.addPattern(2, silence44, "D", "m", -1);
 
           score.multiSeq.addSequence(2, function(seq) {
             seq.addSequence(2, function(seq) {
