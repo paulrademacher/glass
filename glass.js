@@ -1,10 +1,14 @@
-function Note(len, nums) {
+// TODO: Delete Line object.  It's replaced by Sequence.
+
+function Note(len, nums, patternInstanceId) {
   this.len = len;
 
   if (typeof nums == 'number') {
     nums = [nums];
   }
   this.nums = nums;
+
+  this.patternInstanceId = patternInstanceId;
 }
 
 function Score(timeSig) {
@@ -18,8 +22,6 @@ function Score(timeSig) {
 }
 
 Score.prototype.play = function(tempo) {
-  console.log("PLAY");
-
   var leftNoteStream = this.leftSeq.generateNoteStream();
   var rightNoteStream = this.rightSeq.generateNoteStream();
 
@@ -35,6 +37,7 @@ function Pattern() {
 
 function NoteStream() {
   this.notes = [];
+  this.currentPatternId = "";
 }
 
 NoteStream.prototype.push = function(x) {
@@ -49,15 +52,14 @@ NoteStream.prototype.play = function(tempo) {
     var ms = noteLenToMs(tempo, len);
 
     for (var j = 0; j < nums.length; j++) {
-      if (nums[j] >= 0) {  // -1 is a rest.
-        if (nums[j] < 50) {
-          velocity = 127;
-        } else {
-          velocity = 60;
-        }
-
-        playNote(nums[j], time, ms, velocity);
+      if (nums[j] < 50) {
+        velocity = 127;
+      } else {
+        velocity = 60;
       }
+
+      playNote(nums[j], time, ms, velocity, this,
+               this.notes[i].patternInstanceId);
     }
     time += ms;
   }
@@ -69,7 +71,36 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
   this.noteBase = noteBase;
   this.scaleType = scaleType;
   this.octaveOffset = octaveOffset;
+  this.id = "p" + ("" + Math.random()).substring(2);
 }
+
+PatternInstance.prototype.generateNoteStream = function(doRepeats) {
+  var note = noteStringToNum(this.noteBase, this.pattern.startOctave + this.octaveOffset);
+
+  // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
+
+  var noteStream = new NoteStream();
+
+  var repeats = doRepeats ? this.repeats : 1;
+
+  for (var r = 0; r < repeats; r++) {
+    for (var i = 0; i < this.pattern.notes.length; i++) {
+      var nums = this.pattern.notes[i].nums;
+      var len = this.pattern.notes[i].len;
+
+      var actualNums = [];
+      for (var j = 0; j < nums.length; j++) {
+        if (nums[j] == -1) {
+          actualNums[j] = -1;  // Rest.
+        } else {
+          actualNums[j] = note + scaleNumToNoteNum(this.scaleType, nums[j]);
+        }
+      }
+      noteStream.push(new Note(len, actualNums, this.id));
+    }
+  }
+  return noteStream;
+};
 
 /* Serializes a Pattern to a plain array. */
 function serializePattern(pattern) {
@@ -279,33 +310,61 @@ MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patte
   }
 };
 
+Sequence.prototype.renderIntoDiv = function($div) {
+  var $sub = $("<div>").css("border", "1px solid silver").css("padding", "8px").css("margin", "8px");
+  $div.append($sub);
+  $sub.append($("<div>").text("x" + this.repeats).css("font-style", "italic"));
+  for (var i = 0; i < this.items.length; i++) {
+    var item = this.items[i];
+    if (item.type == PATTERN_INSTANCE) {
+      var patternInstance = item.item;
+      var $notationParent = $("<div>").css("height", "80px").css("width", "300px").
+        attr("id", patternInstance.id).addClass("patternInstance");
+      var $notation = $("<div>");
+//      $notationParent.append($("<span>").html("x" + patternInstance.repeats).
+//                             css("font-style", "italic").css("float", "left"));
+      $notationParent.append($notation);
+      $sub.append($notationParent);
+      var abc = patternInstance.toABC();
+      if (patternInstance.pattern.startOctave < -1) {
+        abc = "%%staves P1\nV:P1 clef=bass\n"+ abc;
+      }
+      var engraverParams = {
+        "scale": .8,
+        "staffwidth": 300,
+        "paddingtop": -20,
+        "paddingbottom": 0,
+        "paddingleft": 0,
+        "paddingright": 0
+      };
+      ABCJS.renderAbc($notation.get(0), abc, null, engraverParams);
+      $sub.append($("<div>").text(patternInstance.octaveStart));
+
+    } else if (item.type == SEQUENCE) {
+      item.item.renderIntoDiv($sub);
+    }
+  }
+};
+
+Score.prototype.renderIntoDiv = function($div) {
+  var $leftDiv = $("<div>").attr("id", "leftNotation").
+    css("border", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Left");
+  var $rightDiv = $("<div>").attr("id", "rightNotation").
+    css("border", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Right");
+
+  this.leftSeq.renderIntoDiv($leftDiv);
+  this.rightSeq.renderIntoDiv($rightDiv);
+
+  $div.append($leftDiv);
+  $div.append($rightDiv);
+};
+
 Sequence.prototype.generateNoteStream = function() {
   var time = {'t': 0};
   var noteStream = new NoteStream();
   this.traverse(function(p /* patternInstance */) {
-    var note = noteStringToNum(p.noteBase, p.pattern.startOctave + p.octaveOffset);
-
-    // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
-
-    for (var r = 0; r < p.repeats; r++) {
-      for (var i = 0; i < p.pattern.notes.length; i++) {
-        var nums = p.pattern.notes[i].nums;
-        var len = p.pattern.notes[i].len;
-
-        var actualNums = [];
-        for (var j = 0; j < nums.length; j++) {
-          if (nums[j] == -1) {
-            actualNums[j] = -1;  // Rest.
-          } else {
-            actualNums[j] = note + scaleNumToNoteNum(p.scaleType, nums[j]);
-          }
-        }
-
-        //actualNums = invert12(actualNums, 3);
-
-        noteStream.push(new Note(len, actualNums));
-      }
-    }
+    var s = p.generateNoteStream(true);
+    noteStream.notes = noteStream.notes.concat(s.notes);
   });
   return noteStream;
 };
@@ -421,9 +480,9 @@ function midiNoteToABC(note) {
   var noteStr = encoded.substr(0, encoded.length - 1);
 
   if (noteStr[1] == 'b') {
-    noteStr = noteStr[0] + '_';
+    noteStr = '_' + noteStr[0];
   } else if (noteStr[1] == '#') {
-    noteStr = noteStr[0] + '^';
+    noteStr = '^' + noteStr[0];
   }
 
   if (octave == 5) {
@@ -441,7 +500,9 @@ function midiNoteToABC(note) {
   return noteStr;
 }
 
-Line.prototype.toABC = function() {
+PatternInstance.prototype.toABC = function() {
+  var noteStream = this.generateNoteStream(false);
+
   var abc = "";
   var s = [];
 
@@ -449,13 +510,12 @@ Line.prototype.toABC = function() {
   var beats = 0;  // Number of beats so far.
   var timeInMs = 0;  // Time, up to one measure.
   var timeTotalInMs = 0;
-  for (var i = 0; i < this.notes.length; i++) {
-    if (timeTotalInMs > 20000) {
-      break;
-    }
 
-    var nums = this.notes[i].nums;
-    var len = this.notes[i].len;
+  var notes = noteStream.notes;
+
+  for (var i = 0; i < notes.length; i++) {
+    var nums = notes[i].nums;
+    var len = notes[i].len;
 
     if (parseInt(timeInMs) == 1000) {
       timeInMs = 0;
@@ -476,7 +536,6 @@ Line.prototype.toABC = function() {
       timeInMs = 0;
       beats += 6;
     }
-
 
     if (timeInMs == 0) {
       // Start bar?
@@ -519,13 +578,35 @@ Line.prototype.toABC = function() {
 };
 
 // Delay the timeouts by a constant time to allow initial setup to complete.
+// TODO: is this helpful?
 var DELAY_START_OFFSET = 100;
-function playNote(note, time, len, velocity) {
+var lastLeftPatternId = "";
+var lastRightPatternId = "";
+
+/* hand is 0:left or 1:right */
+function playNote(note, time, len, velocity, noteStream, patternId) {
   setTimeout(function() {
-    MIDI.noteOn(0, note, velocity, 0);
-    setTimeout(function() {
-      MIDI.noteOff(0, note, 30, 0);
-    }, Math.max(0, len));
+    if (note >= 0) {
+      // note=-1 is a rest.  But we still want to invoke this function to get the
+      // css highlight below.
+      MIDI.noteOn(0, note, velocity, 0);
+    }
+
+    if (patternId != noteStream.currentPatternId) {
+      if (noteStream.currentPatternId != "") {
+        // Hide old highlight.
+        $("#" + noteStream.currentPatternId).css("border", "1px solid white");
+      }
+      // Highlight new.
+        $("#" + patternId).css("border", "1px solid blue");
+      noteStream.currentPatternId = patternId;
+    }
+
+    if (note >= 0) {
+      setTimeout(function() {
+        MIDI.noteOff(0, note, 30, 0);
+      }, Math.max(0, len));
+    }
   }, time + DELAY_START_OFFSET);
 }
 
@@ -552,20 +633,4 @@ function invert12(notes, direction) {
   }
   return notes;
 }
-
-Score.prototype.render = function($div) {
-  // We assume left and right have same number of patterns.
-  var html = this.left.patternInstances.length + " " + this.right.patternInstances.length + "<BR>\n";
-
-  for (var i = 0; i < this.left.patternInstances.length; i++) {
-    for (var j = 0; j < this.left.patternInstances[i].repeats; j++) {
-      html += this.left.patternInstances[i].noteBase + " " + this.right.patternInstances[i].noteBase + "<BR>\n";
-    }
-  }
-
-  $div.html(html);
-};
-
-Pattern.prototype.render = function() {
-};
 

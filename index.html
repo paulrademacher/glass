@@ -14,8 +14,24 @@
       body {
         font-family: helvetica, arial;
       }
+
       #score {
+      }
+
+      #leftNotation {
         border: 1px solid silver;
+        float: left;
+        width: 400px;
+      }
+
+      #rightNotation {
+        float: left;
+        border: 1px solid silver;
+        width: 400px;
+      }
+
+      .patternInstance {
+        border: 1px solid white;
       }
     </style>
 </head>
@@ -67,7 +83,7 @@ window.onload = function () {
           }
 
           score.multiSeq.addSequence(2, function(seq) {
-/*            seq.addSequence(1, function(seq) {
+            seq.addSequence(2, function(seq) {
               seq.addPattern(4, pattern6, silence34, "D", "m", 0);
               seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
               seq.addPattern(3, pattern6, silence34, "D", "m", 0);
@@ -78,7 +94,7 @@ window.onload = function () {
             seq.addPattern(2, pattern6, pattern7, "Eb", "M", 0);
             seq.addPattern(2, pattern6, pattern7, "C", "M", 0);
             seq.addPattern(2, pattern6, pattern7, "A", "M", 0);
-*/
+
             seq.addSequence(1, function(seq) {
               seq.addPattern(4, pattern6, silence34, "D", "m", 0);
               seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
@@ -93,37 +109,7 @@ window.onload = function () {
             });
           });
 
-          if (false) {
-            for (var i = 0; i < 2; i++) {
-              for (var j = 0; j < 1; j++) {
-                addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
-                addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-                addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
-              }
-
-              addLeftRightPattern(2, pattern6, pattern7, "D", "m", 0);
-              addLeftRightPattern(2, pattern6, pattern7, "D", "mM", 0);
-              addLeftRightPattern(2, pattern6, pattern7, "G", "m", 0);
-              addLeftRightPattern(2, pattern6, pattern7, "Eb", "M", 0);
-              addLeftRightPattern(2, pattern6, pattern7, "C", "M", 0);
-              addLeftRightPattern(2, pattern6, pattern7, "A", "M", 0);
-
-              for (var j = 0; j < 1; j++) {
-                addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
-                addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-                addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
-              }
-
-              for (var j = 0; j < 4; j++) {
-                addLeftRightPattern(2, pattern6, pattern7, "D", "M", 0);
-                addLeftRightPattern(1, pattern6, pattern7, "F#", "M", 0);
-                addLeftRightPattern(1, pattern6, pattern7, "F#", "7", 0);
-                addLeftRightPattern(4, pattern6, pattern7, "D", "M", 0);
-              }
-            }
-          }
-
-          var doABCNotation = false;
+/*          var doABCNotation = false;
           if (doABCNotation) {
             var abcLeft = left.toABC();
             var abcRight = right.toABC();
@@ -133,14 +119,15 @@ window.onload = function () {
 
             ABCJS.renderAbc('score', abc);
           }
+*/
+          score.renderIntoDiv($("#score"));
 
-          score.render($("#score"));
-          score.play(tempo);
+          setTimeout(function() { score.play(tempo); }, 500);
         }
     });
 };
 </script>
 
-<div id="score">score</div>
+<div id="score"></div>
 </body>
 </html>
