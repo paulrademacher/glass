@@ -10,6 +10,7 @@
     <script src="abcjs_basic_1.10-min.js"></script>
 
     <script src="glass.js"></script>
+    <script src="pieces.js"></script>
 
     <style>
       body {
@@ -35,140 +36,28 @@
         border: 1px solid white;
       }
     </style>
+
+    <script type="text/javascript">
+      function onload() {
+        MIDI.loadPlugin({
+          soundfontUrl: "./soundfont/",
+          instrument: "acoustic_grand_piano",
+          onprogress: function(state, progress) {
+          },
+          onsuccess: function() {
+            MIDI.setVolume(0, 127);
+            playPieces();
+          }
+        });
+      };
+    </script>
 </head>
-<body>
-<script type="text/javascript">
-
-window.onload = function () {
-
-    MIDI.loadPlugin({
-        soundfontUrl: "./soundfont/",
-        instrument: "acoustic_grand_piano",
-        onprogress: function(state, progress) {
-        },
-        onsuccess: function() {
-          var delay = 0; // play one note every quarter second
-          var velocity = 127; // how hard the note hits
-          var tempo = 170;
-          // play the note
-          MIDI.setVolume(0, 127);
-
-          var pattern1 = deserializePattern(patternsRaw[0]);
-          var pattern2 = deserializePattern(patternsRaw[1]);
-          var pattern3 = deserializePattern(patternsRaw[2]);
-          var pattern4 = deserializePattern(patternsRaw[3]);
-          var pattern5 = deserializePattern(patternsRaw[4]);
-          var pattern6 = deserializePattern(patternsRaw[5]);
-          var pattern7 = deserializePattern(patternsRaw[6]);
-          var pattern8 = deserializePattern(patternsRaw[7]);
-          var pattern9 = deserializePattern(patternsRaw[8]);
-          var pattern10 = deserializePattern(patternsRaw[9]);
-          var pattern11 = deserializePattern(patternsRaw[10]);
-          var pattern12 = deserializePattern(patternsRaw[11]);
-          var pattern13 = deserializePattern(patternsRaw[12]);
-          var pattern14 = deserializePattern(patternsRaw[13]);
-          var pattern15 = deserializePattern(patternsRaw[14]);
-          var silence34 = pattern9;
-          var silence44 = pattern10;
-
-/*          pattern6 = pattern5;
-          pattern7 = pattern1;
-          pattern8 = pattern3;
-          silence34 = silence44;
-*/
-
-          var score = new Score(34);
-          var left = score.left;
-          var right = score.right;
-
-          function addLeftRightPattern(repeats, leftPattern, rightPattern,
-                                       noteBase, scaleType, octaveOffset) {
-            left.addPattern(repeats, leftPattern, noteBase, scaleType, octaveOffset);
-            right.addPattern(repeats, rightPattern, noteBase, scaleType, octaveOffset);
-          }
-
-          score.leftSeq.addPattern(8, pattern12, "D", "m", -1);
-          score.rightSeq.addPattern(4, silence44, "D", "m", -1);
-
-          score.multiSeq.addSequence(2, function(seq) {
-            seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-            seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
-          });
-
-          score.multiSeq.addSequence(2, function(seq) {
-            seq.leftSeq.addPattern(6, pattern14, "Bb", "M", -1);
-            seq.rightSeq.addPattern(8, pattern15, "Bb", "M", -1);
-            seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-            seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
-          });
-
-          score.leftSeq.addPattern(6, pattern14, "Bb", "M", -1);
-          score.rightSeq.addPattern(8, pattern15, "Bb", "M", -1);
-
-          score.multiSeq.addSequence(2, function(seq) {
-            seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-            seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
-          });
-
-          score.multiSeq.addSequence(2, function(seq) {
-            seq.leftSeq.addPattern(6, pattern14, "A", "M", -1);
-            seq.rightSeq.addPattern(8, pattern15, "A", "M", -1);
-            seq.leftSeq.addPattern(3, pattern12, "D", "m", -1);
-            seq.rightSeq.addPattern(4, pattern13, "D", "m", -1);
-            seq.leftSeq.addPattern(3, pattern12, "D", "M", -1);
-            seq.rightSeq.addPattern(4, pattern13, "D", "M", -1);
-          });
-
-
-          score.leftSeq.addPattern(2, silence44, "D", "m", -1);
-          score.rightSeq.addPattern(2, silence44, "D", "m", -1);
-
-          score.multiSeq.addSequence(2, function(seq) {
-            seq.addSequence(2, function(seq) {
-              seq.addPattern(4, pattern6, silence34, "D", "m", 0);
-              seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-              seq.addPattern(3, pattern6, silence34, "D", "m", 0);
-            });
-            seq.addPattern(2, pattern6, pattern7, "D", "m", 0);
-            seq.addPattern(2, pattern6, pattern7, "D", "mM", 0);
-            seq.addPattern(2, pattern6, pattern7, "G", "m", 0);
-            seq.addPattern(2, pattern6, pattern7, "Eb", "M", 0);
-            seq.addPattern(2, pattern6, pattern7, "C", "M", 0);
-            seq.addPattern(2, pattern6, pattern7, "A", "M", 0);
-
-            seq.addSequence(1, function(seq) {
-              seq.addPattern(4, pattern6, silence34, "D", "m", 0);
-              seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-              seq.addPattern(3, pattern6, silence34, "D", "m", 0);
-            });
-
-            seq.addSequence(2, function(seq) {
-              seq.addPattern(2, pattern6, pattern11, "D", "M", 0);
-              seq.addPattern(1, pattern6, pattern7, "F#", "M", 0);
-              seq.addPattern(1, pattern6, pattern7, "F#", "7", 0);
-              seq.addPattern(4, pattern6, pattern11, "D", "M", 0);
-            });
-          });
-
-/*          var doABCNotation = false;
-          if (doABCNotation) {
-            var abcLeft = left.toABC();
-            var abcRight = right.toABC();
-            var abc = "%%staves P1 P2\n";
-            abc += "V:P1\n" + abcRight + "\nV: P2 clef=bass\n" + abcLeft;
-            console.log(abc);
-
-            ABCJS.renderAbc('score', abc);
-          }
-*/
-          score.renderIntoDiv($("#score"));
-
-          setTimeout(function() { score.play(tempo); }, 500);
-        }
-    });
-};
-</script>
-
+<body onload='onload()'>
+<div>
+  <button onclick='playEtude12()'>Etude 12</button>
+  <button onclick='playMetamorphosisThree()'>Metamorphosis Three</button>
+  <button onclick='stopAll()'>Stop playing</button>
+</div>
 <div id="score"></div>
 </body>
 </html>

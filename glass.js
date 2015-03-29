@@ -21,12 +21,22 @@ function Score(timeSig) {
   this.multiSeq = new MultiChannelSequence(this.leftSeq, this.rightSeq);
 }
 
-Score.prototype.play = function(tempo) {
+Score.prototype.play = function(tempo, $scoreDiv) {
+  stopAll();
+
+  $scoreDiv.html("");
+  this.renderIntoDiv($scoreDiv);
+
   var leftNoteStream = this.leftSeq.generateNoteStream();
   var rightNoteStream = this.rightSeq.generateNoteStream();
 
-  leftNoteStream.play(tempo);
-  rightNoteStream.play(tempo);
+  // Wait a bit before playing, to give render time to complete.
+  setTimeout(function() {
+    leftNoteStream.play(tempo);
+    rightNoteStream.play(tempo);
+  }, 600);
+
+  currentlyPlaying = this;
 };
 
 function Pattern() {
@@ -168,48 +178,6 @@ function scaleNumToNoteNum(scaleType, num) {
 
   return note;
 }
-
-var patternsRaw = [
-  [44, -1, [[3, -3], [3, 0], [3, 2],
-            [3, -3], [3, 0], [3, 2],
-            [3, -3], [3, 0], [3, 2],
-            [3, -3], [3, 0], [3, 2]]],
-  [44, 0, [[8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2]]],
-  [44, -2, [[1, 0]]],
-  [44, -1, [[3, -5], [3, -3], [3, 0],
-            [3, -5], [3, -3], [3, 0],
-            [3, -5], [3, -3], [3, 0],
-            [3, -5], [3, -3], [3, 0]]],
-  [44, -2, [[8, [0, 2]], [8, 4],
-           [8, [0, 2]], [8, 4],
-           [8, [0, 2]], [8, 4],
-           [8, [0, 2]], [8, 4]]],
-  [34, -2, [[8, [0, 2]], [8, 4],
-           [8, [0, 2]], [8, 4],
-           [8, [0, 2]], [8, 4]]],
-  [34, -1, [[45, [0, 2, 4]],
-           [45, [0, 2, 4]]]],
-  [34, -3, [[30, [0, 7]]]],
-  [34, 0, [[30, -1]]], // 3/4 rest
-  [44, 0, [[1, -1]]], // 4/4 rest
-
-/* pattern11 */
-  [34, -1, [[45, [2, 4, 7]],
-            [45, [2, 4, 7]]
-           ]],
-
-/* pattern12 - etude12 LH beginning */
-  [44, -1, [[8, 0], [8, 7], [8, [2, 4]], [8, 7]]],
-
-/* pattern13 - etude12 RH beginning */
-  [34, 0, [[8, 2], [8, 4], [8, 7]]],
-
-/* pattern14 - etude12 LH beginning - inverted */
-  [44, -1, [[8, -5], [8, 2], [8, [-3, 0]], [8, 2]]],
-
-/* pattern15 - etude12 RH beginning - inverted */
-  [34, 0, [[8, -3], [8, 0], [8, 2]]],
-];
 
 /* noteLen:
    4 -> quarter note
@@ -594,9 +562,19 @@ var DELAY_START_OFFSET = 100;
 var lastLeftPatternId = "";
 var lastRightPatternId = "";
 
+// All setTimeout() handles.
+var allTimeouts = [];
+
+function stopAll() {
+  for (var i = 0; i < allTimeouts.length; i++) {
+    clearTimeout(allTimeouts[i]);
+  }
+  allTimeouts = [];
+}
+
 /* hand is 0:left or 1:right */
 function playNote(note, time, len, velocity, noteStream, patternId) {
-  setTimeout(function() {
+  var timeout = setTimeout(function() {
     if (note >= 0) {
       // note=-1 is a rest.  But we still want to invoke this function to get the
       // css highlight below.
@@ -619,11 +597,13 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
     }
 
     if (note >= 0) {
-      setTimeout(function() {
+      var timeout = setTimeout(function() {
         MIDI.noteOff(0, note, 30, 0);
       }, Math.max(0, len));
+      allTimeouts.push(timeout);
     }
   }, time + DELAY_START_OFFSET);
+  allTimeouts.push(timeout);
 }
 
 /* notes is an array of note numbers.
