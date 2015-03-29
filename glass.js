@@ -31,10 +31,11 @@ Score.prototype.play = function(tempo, $scoreDiv) {
   var rightNoteStream = this.rightSeq.generateNoteStream();
 
   // Wait a bit before playing, to give render time to complete.
-  setTimeout(function() {
+  var timeout = setTimeout(function() {
     leftNoteStream.play(tempo);
     rightNoteStream.play(tempo);
   }, 600);
+  allTimeouts.push(timeout);
 
   currentlyPlaying = this;
 };
@@ -99,6 +100,7 @@ PatternInstance.prototype.generateNoteStream = function(doRepeats) {
       var len = this.pattern.notes[i].len;
 
       var actualNums = [];
+
       for (var j = 0; j < nums.length; j++) {
         if (nums[j] == -1) {
           actualNums[j] = -1;  // Rest.
@@ -159,7 +161,8 @@ function scaleNumToNoteNum(scaleType, num) {
     'm':  [0, 2, 3, 5, 7, 9, 10],
     'M':  [0, 2, 4, 5, 7, 9, 11],
     'mM': [-1, 2, 3, 5, 7, 9, 0],  // minor-Maj7.  Note we swap root and 7th.
-    '7':  [-2, 2, 4, 5, 7, 9, 0]  // Dom7.  Note we swap root and 7th.
+    '7':  [-2, 2, 4, 5, 7, 9, 0],  // Dom7.  Note we swap root and 7th.
+    'M7':  [-1, 2, 4, 5, 7, 9, 0],  // Maj7.  Note we swap root and 7th.
   };
 
   var octaveOffset = 0;
@@ -192,18 +195,20 @@ function noteLenToMs(tempo, noteLen) {
   var quarter = 60 / tempo * 1000;
   if (noteLen == 4) {
     return quarter;
-  } if (noteLen == 8) {
+  } else if (noteLen == 8) {
     return quarter / 2;
-  } if (noteLen == 1) {
+  } else if (noteLen == 1) {
     return quarter * 4;
-  } if (noteLen == 45) {
+  } else if (noteLen == 45) {
     return quarter *  1.5;
-  } if (noteLen == 30) {
+  } else if (noteLen == 30) {
     return quarter * 3;
-  } if (noteLen == 2) {
+  } else if (noteLen == 2) {
     return quarter * 2;
-  } if (noteLen == 3) {
+  } else if (noteLen == 3) {
     return quarter / 3;
+  } else if (noteLen == 6) {
+    return quarter / 6;
   }
 }
 
@@ -212,17 +217,21 @@ function noteLenToMs(tempo, noteLen) {
 function noteLenToABC(noteLen) {
   if (noteLen == 4) {
     return "2";
-  } if (noteLen == 8) {
+  } else if (noteLen == 8) {
     return "";
-  } if (noteLen == 1) {
+  } else if (noteLen == 1) {
     return "8";
-  } if (noteLen == 45) {
+  } else if (noteLen == 45) {
     return "3";
-  } if (noteLen == 30) {
+  } else if (noteLen == 30) {
     return "6";
-  } if (noteLen == 2) {
+  } else if (noteLen == 2) {
     return "4";
-  } if (noteLen == 3) {
+  } else if (noteLen == 3) {
+    // TODO: tuplets are prefixed;
+    return "";
+  } else if (noteLen == 6) {
+    // TODO: tuplets are prefixed;
     return "";
   }
 }

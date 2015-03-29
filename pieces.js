@@ -4,6 +4,8 @@ var patternsRaw = [
             [3, -3], [3, 0], [3, 2],
             [3, -3], [3, 0], [3, 2]]],
   [44, 0, [[8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2], [8, 0], [8, 2]]],
+
+/* pattern3 - 4/4 whole note */
   [44, -2, [[1, 0]]],
   [44, -1, [[3, -5], [3, -3], [3, 0],
             [3, -5], [3, -3], [3, 0],
@@ -38,6 +40,49 @@ var patternsRaw = [
 
 /* pattern15 - etude12 RH beginning - inverted */
   [34, 0, [[8, -3], [8, 0], [8, 2]]],
+
+/* pattern16 */
+  [44, -2, [[8, [0, 2]], [8, 4],
+           [8, 2], [8, 4],
+           [8, 2], [8, 4],
+           [8, 2], [8, 4]]],
+
+/* pattern17 - Mad Rush flutter */
+  [44, -1, [[3, 4], [3, 2], [3, 4],
+           [3, 2], [3, 4], [3, 2],
+           [3, 4], [3, 2], [3, 4],
+           [3, 2], [3, 4], [3, 2]
+          ]],
+
+/* pattern18 - Mad Rush flutter 2 */
+  [44, -1, [[3, 2], [3, -3], [3, 2],
+           [3, -3], [3, 2], [3, -3],
+           [3, 2], [3, -3], [3, 2],
+           [3, -3], [3, 2], [3, -3]
+          ]],
+
+/* pattern19 - Mad Rush flutter */ // TODO: Not needed after invert optimization.
+  [44, -1, [[3, 2], [3, 0], [3, 2],
+           [3, 0], [3, 2], [3, 0],
+           [3, 2], [3, 0], [3, 2],
+           [3, 0], [3, 2], [3, 0]
+          ]],
+
+/* pattern20 - Mad Rush flutter */ // TODO: Not needed after invert optimization.
+  [44, -1, [[3, 4], [3, 0], [3, 4],
+           [3, 0], [3, 4], [3, 0],
+           [3, 4], [3, 0], [3, 4],
+           [3, 0], [3, 4], [3, 0]
+          ]],
+
+/* pattern21 - half note silence */
+  [44, 0, [[2, -1]]],
+
+/* pattern22 - 6-tuplet arpeggio up */
+  [44, -1, [[6, 2], [6, 4], [6, 6], [6, 7], [6, 4], [6, 2]]],
+
+/* pattern23 - 6-tuplet arpeggio down */
+  [44, -2, [[6, 7], [6, 4], [6, 2], [6, 0], [6, 2], [6, 4]]]
 ];
 
 
@@ -56,8 +101,19 @@ var pattern12 = deserializePattern(patternsRaw[11]);
 var pattern13 = deserializePattern(patternsRaw[12]);
 var pattern14 = deserializePattern(patternsRaw[13]);
 var pattern15 = deserializePattern(patternsRaw[14]);
+var pattern16 = deserializePattern(patternsRaw[15]);
+var pattern17 = deserializePattern(patternsRaw[16]);
+var pattern18 = deserializePattern(patternsRaw[17]);
+var pattern19 = deserializePattern(patternsRaw[18]);
+var pattern20 = deserializePattern(patternsRaw[19]);
+var pattern21 = deserializePattern(patternsRaw[20]);
+var pattern22 = deserializePattern(patternsRaw[21]);
+var pattern23 = deserializePattern(patternsRaw[22]);
+
+var whole44 = pattern3;
 var silence34 = pattern9;
 var silence44 = pattern10;
+var silencehalf = pattern21;
 
 /*          pattern6 = pattern5;
           pattern7 = pattern1;
@@ -71,7 +127,6 @@ function playPieces() {
 
 function playMetamorphosisThree() {
   var score = new Score(34);
-  var tempo = 170;
 
   score.multiSeq.addSequence(2, function(seq) {
     seq.addSequence(2, function(seq) {
@@ -100,12 +155,11 @@ function playMetamorphosisThree() {
     });
   });
 
-  score.play(tempo, $("#score"));
+  score.play(160, $("#score"));
 }
 
 function playEtude12() {
   var score = new Score(34);
-  var tempo = 170;
 
   score.leftSeq.addPattern(8, pattern12, "D", "m", -1);
   score.rightSeq.addPattern(4, silence44, "D", "m", -1);
@@ -139,5 +193,68 @@ function playEtude12() {
     seq.rightSeq.addPattern(4, pattern13, "D", "M", -1);
   });
 
-  score.play(tempo, $("#score"));
+  score.play(170, $("#score"));
+}
+
+function playMadRush() {
+  var score = new Score(44);
+
+  function intro() {
+    score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+    score.rightSeq.addPattern(2, silence44, "F", "M", 0);
+    score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);  // TODO: Really, Am, but sounds bad until we optimize inversion.
+    score.rightSeq.addPattern(1, whole44, "C", "M", -1);
+    score.rightSeq.addPattern(1, silence44, "F", "M", 0);
+  }
+
+  function theme1() {
+    score.multiSeq.addSequence(2, function(seq) {
+      seq.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+      seq.leftSeq.addPattern(2, pattern16, "F", "M7", 0);
+      seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
+      seq.rightSeq.addPattern(2, pattern18, "A", "m", 0);
+    });
+  }
+
+  function theme2() {
+    score.multiSeq.addSequence(2, function(seq) {
+      seq.leftSeq.addPattern(2, pattern16, "G", "m", 0);
+      seq.rightSeq.addPattern(1, pattern19, "G", "m", 0);
+      seq.rightSeq.addPattern(1, pattern20, "G", "m", 0);
+
+      seq.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+      seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
+    });
+  }
+
+  function segue() {
+    score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+    score.rightSeq.addPattern(2, silence44, "F", "M", 0);
+    score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);  // TODO: Really, Am, but sounds bad until we optimize inversion.
+    score.rightSeq.addPattern(1, whole44, "A", "M", -2);
+    score.rightSeq.addPattern(1, silence44, "F", "M", 0);
+  }
+
+  function arpeggio1(noteBase, scaleType) {
+    score.leftSeq.addPattern(8, pattern23, noteBase, scaleType, -1);
+    score.rightSeq.addPattern(8, pattern22, noteBase, scaleType, 0);
+  }
+
+  intro();
+  theme1();
+  theme2();
+  segue();
+
+  // Dramatic pause!
+  score.leftSeq.addPattern(1, silencehalf, "F", "M", 0);
+  score.rightSeq.addPattern(1, silencehalf, "F", "M", 0);
+
+  arpeggio1("F", "M");
+  arpeggio1("A", "m");
+  arpeggio1("F", "M");
+  arpeggio1("A", "m");
+
+  intro();
+
+  score.play(110, $("#score"));
 }
