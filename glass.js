@@ -610,9 +610,11 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
         $("#" + noteStream.currentPatternId).css("background-color", "white");
       }
       // Highlight new.
-      $("#" + patternId).css("border", "1px solid blue");
+      var highlightId = "#" + patternId;
+      $(highlightId).css("border", "1px solid blue");
+      $(highlightId).css("background-color", "#fcfcff");
+      $(highlightId).scrollintoview();
 
-      $("#" + patternId + "").css("background-color", "#fcfcff");
       noteStream.currentPatternId = patternId;
     }
 
