@@ -46,6 +46,7 @@ window.onload = function () {
           var pattern8 = deserializePattern(patternsRaw[7]);
           var pattern9 = deserializePattern(patternsRaw[8]);
           var pattern10 = deserializePattern(patternsRaw[9]);
+          var pattern11 = deserializePattern(patternsRaw[10]);
           var silence34 = pattern9;
           var silence44 = pattern10;
 
@@ -65,31 +66,60 @@ window.onload = function () {
             right.addPattern(repeats, rightPattern, noteBase, scaleType, octaveOffset);
           }
 
-          for (var i = 0; i < 2; i++) {
-            for (var j = 0; j < 1; j++) {
-              addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
-              addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-              addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
-            }
+          score.multiSeq.addSequence(2, function(seq) {
+/*            seq.addSequence(1, function(seq) {
+              seq.addPattern(4, pattern6, silence34, "D", "m", 0);
+              seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+              seq.addPattern(3, pattern6, silence34, "D", "m", 0);
+            });
+            seq.addPattern(2, pattern6, pattern7, "D", "m", 0);
+            seq.addPattern(2, pattern6, pattern7, "D", "mM", 0);
+            seq.addPattern(2, pattern6, pattern7, "G", "m", 0);
+            seq.addPattern(2, pattern6, pattern7, "Eb", "M", 0);
+            seq.addPattern(2, pattern6, pattern7, "C", "M", 0);
+            seq.addPattern(2, pattern6, pattern7, "A", "M", 0);
+*/
+            seq.addSequence(1, function(seq) {
+              seq.addPattern(4, pattern6, silence34, "D", "m", 0);
+              seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+              seq.addPattern(3, pattern6, silence34, "D", "m", 0);
+            });
 
-            addLeftRightPattern(2, pattern6, pattern7, "D", "m", 0);
-            addLeftRightPattern(2, pattern6, pattern7, "D", "mM", 0);
-            addLeftRightPattern(2, pattern6, pattern7, "G", "m", 0);
-            addLeftRightPattern(2, pattern6, pattern7, "Eb", "M", 0);
-            addLeftRightPattern(2, pattern6, pattern7, "C", "M", 0);
-            addLeftRightPattern(2, pattern6, pattern7, "A", "M", 0);
+            seq.addSequence(2, function(seq) {
+              seq.addPattern(2, pattern6, pattern11, "D", "M", 0);
+              seq.addPattern(1, pattern6, pattern7, "F#", "M", 0);
+              seq.addPattern(1, pattern6, pattern7, "F#", "7", 0);
+              seq.addPattern(4, pattern6, pattern11, "D", "M", 0);
+            });
+          });
 
-            for (var j = 0; j < 1; j++) {
-              addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
-              addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-              addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
-            }
+          if (false) {
+            for (var i = 0; i < 2; i++) {
+              for (var j = 0; j < 1; j++) {
+                addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+                addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+                addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
+              }
 
-            for (var j = 0; j < 4; j++) {
-              addLeftRightPattern(2, pattern6, pattern7, "D", "M", 0);
-              addLeftRightPattern(1, pattern6, pattern7, "F#", "M", 0);
-              addLeftRightPattern(1, pattern6, pattern7, "F#", "7", 0);
-              addLeftRightPattern(4, pattern6, pattern7, "D", "M", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "D", "m", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "D", "mM", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "G", "m", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "Eb", "M", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "C", "M", 0);
+              addLeftRightPattern(2, pattern6, pattern7, "A", "M", 0);
+
+              for (var j = 0; j < 1; j++) {
+                addLeftRightPattern(4, pattern6, silence34, "D", "m", 0);
+                addLeftRightPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
+                addLeftRightPattern(3, pattern6, silence34, "D", "m", 0);
+              }
+
+              for (var j = 0; j < 4; j++) {
+                addLeftRightPattern(2, pattern6, pattern7, "D", "M", 0);
+                addLeftRightPattern(1, pattern6, pattern7, "F#", "M", 0);
+                addLeftRightPattern(1, pattern6, pattern7, "F#", "7", 0);
+                addLeftRightPattern(4, pattern6, pattern7, "D", "M", 0);
+              }
             }
           }
 

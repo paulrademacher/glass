@@ -11,13 +11,57 @@ function Score(timeSig) {
   this.timeSig = timeSig;
   this.left = new Line(timeSig);
   this.right = new Line(timeSig);
+
+  this.leftSeq = new Sequence(1);
+  this.rightSeq = new Sequence(1);
+  this.multiSeq = new MultiChannelSequence(this.leftSeq, this.rightSeq);
 }
+
+Score.prototype.play = function(tempo) {
+  console.log("PLAY");
+
+  var leftNoteStream = this.leftSeq.generateNoteStream();
+  var rightNoteStream = this.rightSeq.generateNoteStream();
+
+  leftNoteStream.play(tempo);
+  rightNoteStream.play(tempo);
+};
 
 function Pattern() {
   this.timeSig = 0;
   this.startOctave = 0;
   this.notes = [];
 }
+
+function NoteStream() {
+  this.notes = [];
+}
+
+NoteStream.prototype.push = function(x) {
+  this.notes.push(x);
+}
+
+NoteStream.prototype.play = function(tempo) {
+  var time = 0;
+  for (var i = 0; i < this.notes.length; i++) {
+    var nums = this.notes[i].nums;
+    var len = this.notes[i].len;
+    var ms = noteLenToMs(tempo, len);
+
+    for (var j = 0; j < nums.length; j++) {
+      if (nums[j] >= 0) {  // -1 is a rest.
+        if (nums[j] < 50) {
+          velocity = 127;
+        } else {
+          velocity = 60;
+        }
+
+        playNote(nums[j], time, ms, velocity);
+      }
+    }
+    time += ms;
+  }
+};
 
 function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
   this.repeats = repeats;
@@ -120,6 +164,11 @@ var patternsRaw = [
   [34, -3, [[30, [0, 7]]]],
   [34, 0, [[30, -1]]], // 3/4 rest
   [44, 0, [[1, -1]]], // 4/4 rest
+
+/* pattern11 */
+  [34, -1, [[45, [2, 4, 7]],
+            [45, [2, 4, 7]]
+           ]],
 ];
 
 /* noteLen:
@@ -170,6 +219,114 @@ function noteLenToABC(noteLen) {
   }
 }
 
+var SEQUENCE = 'seq';
+var PATTERN_INSTANCE = 'pat';
+
+/* A SequenceItem can be a Sequence or a pattern. */
+function SequenceItem(type, item) {
+  this.type = type;
+  this.item = item;
+}
+
+function Sequence(repeats) {
+  this.repeats = repeats;
+  this.items = [];
+}
+
+// Callback is optional.  Will be called with new PatternInstance.
+Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset, callback) {
+  var patternInstance = new PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset);
+  var item = new SequenceItem(PATTERN_INSTANCE, patternInstance);
+  this.items.push(item);
+  if (callback) {
+    callback(patternInstance);
+  }
+  return patternInstance;
+};
+
+// Callback is optional.  Will be called with new Sequence.
+Sequence.prototype.addSequence = function(repeats, callback) {
+  var sequence = new Sequence(repeats);
+  var item = new SequenceItem(SEQUENCE, sequence);
+  this.items.push(item);
+  if (callback) {
+    callback(sequence);
+  }
+  return sequence;
+};
+
+function MultiChannelSequence(leftSeq, rightSeq) {
+  this.leftSeq = leftSeq;
+  this.rightSeq = rightSeq;
+}
+
+MultiChannelSequence.prototype.addSequence = function(repeats, callback) {
+  var newLeftSeq = this.leftSeq.addSequence(repeats, null);
+  var newRightSeq = this.rightSeq.addSequence(repeats, null);
+  var newMultiSeq = new MultiChannelSequence(newLeftSeq, newRightSeq);
+  if (callback) {
+    callback(newMultiSeq);
+  }
+};
+
+MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patternRight, noteBase,
+                                                     scaleType, octaveOffset) {
+  if (patternLeft) {
+    this.leftSeq.addPattern(repeats, patternLeft, noteBase, scaleType, octaveOffset, null);
+  }
+  if (patternRight) {
+    this.rightSeq.addPattern(repeats, patternRight, noteBase, scaleType, octaveOffset, null);
+  }
+};
+
+Sequence.prototype.generateNoteStream = function() {
+  var time = {'t': 0};
+  var noteStream = new NoteStream();
+  this.traverse(function(p /* patternInstance */) {
+    var note = noteStringToNum(p.noteBase, p.pattern.startOctave + p.octaveOffset);
+
+    // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
+
+    for (var r = 0; r < p.repeats; r++) {
+      for (var i = 0; i < p.pattern.notes.length; i++) {
+        var nums = p.pattern.notes[i].nums;
+        var len = p.pattern.notes[i].len;
+
+        var actualNums = [];
+        for (var j = 0; j < nums.length; j++) {
+          if (nums[j] == -1) {
+            actualNums[j] = -1;  // Rest.
+          } else {
+            actualNums[j] = note + scaleNumToNoteNum(p.scaleType, nums[j]);
+          }
+        }
+
+        //actualNums = invert12(actualNums, 3);
+
+        noteStream.push(new Note(len, actualNums));
+      }
+    }
+  });
+  return noteStream;
+};
+
+Sequence.prototype.traverse = function(callback) {
+  this.traverseInternal(callback);
+};
+
+// Do not call this directly.  Internal recusion function.
+Sequence.prototype.traverseInternal = function(callback) {
+  for (var j = 0; j < this.repeats; j++) {
+    for (var i = 0; i < this.items.length; i++) {
+      if (this.items[i].type == SEQUENCE) {
+        this.items[i].item.traverseInternal(callback);
+      } else if (this.items[i].type == PATTERN_INSTANCE) {
+        callback(this.items[i].item);
+      }
+    }
+  }
+};
+
 function Line(timeSig) {
   this.timeSig = timeSig;
   this.notes = [];
@@ -179,33 +336,6 @@ function Line(timeSig) {
   // This is maintained in sorted order.
   this.prevPatternNotes = [];
 }
-
-Score.prototype.play = function(tempo) {
-  this.left.play(tempo);
-  this.right.play(tempo);
-};
-
-Line.prototype.play = function(tempo) {
-  var time = 0;
-  for (var i = 0; i < this.notes.length; i++) {
-    var nums = this.notes[i].nums;
-    var len = this.notes[i].len;
-    var ms = noteLenToMs(tempo, len);
-
-    for (var j = 0; j < nums.length; j++) {
-      if (nums[j] >= 0) {  // -1 is a rest.
-        if (nums[j] < 50) {
-          velocity = 127;
-        } else {
-          velocity = 60;
-        }
-
-        playNote(nums[j], time, ms, velocity);
-      }
-    }
-    time += ms;
-  }
-};
 
 /* Optimize newPattern by inverting it until it minimizes the distance
  * against the previously-played (non-empty) pattern. */
@@ -280,30 +410,7 @@ Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octa
                                             scaleType, octaveOffset);
 
   this.patternInstances.push(patternInstance);
-
-  var note = noteStringToNum(noteBase, pattern.startOctave + octaveOffset);
-
-  // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
-
-  for (var r = 0; r < repeats; r++) {
-    for (var i = 0; i < pattern.notes.length; i++) {
-      var nums = pattern.notes[i].nums;
-      var len = pattern.notes[i].len;
-
-      var actualNums = [];
-      for (var j = 0; j < nums.length; j++) {
-        if (nums[j] == -1) {
-          actualNums[j] = -1;  // Rest.
-        } else {
-          actualNums[j] = note + scaleNumToNoteNum(scaleType, nums[j]);
-        }
-      }
-
-      //actualNums = invert12(actualNums, 3);
-
-      this.notes.push(new Note(len, actualNums));
-    }
-  }
+  // TODO: eraseme
 };
 
 function midiNoteToABC(note) {
@@ -411,12 +518,15 @@ Line.prototype.toABC = function() {
   return abc;
 };
 
+// Delay the timeouts by a constant time to allow initial setup to complete.
+var DELAY_START_OFFSET = 100;
 function playNote(note, time, len, velocity) {
   setTimeout(function() {
     MIDI.noteOn(0, note, velocity, 0);
-    var decay = 1;
-    MIDI.noteOff(0, note, velocity, decay);  // TODO: How does noteOff() actually work?
-  }, time);
+    setTimeout(function() {
+      MIDI.noteOff(0, note, 30, 0);
+    }, Math.max(0, len));
+  }, time + DELAY_START_OFFSET);
 }
 
 /* notes is an array of note numbers.
@@ -442,13 +552,6 @@ function invert12(notes, direction) {
   }
   return notes;
 }
-
-Line.prototype.render = function($div) {
-  
-};
-
-Score.prototype.addRepeat = function(repeats) {
-};
 
 Score.prototype.render = function($div) {
   // We assume left and right have same number of patterns.
