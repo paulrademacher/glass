@@ -256,5 +256,5 @@ function playMadRush() {
 
   intro();
 
-  score.play(110, $("#score"));
+  score.play(98, $("#score"));
 }
