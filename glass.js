@@ -565,6 +565,27 @@ PatternInstance.prototype.toABC = function() {
   return abc;
 };
 
+/* Returns an array which is the set of all notes in this pattern instance.  That is,
+   chords are expanded to individual notes, and notes appearing multiple times show up just
+   once here.  The array is sorted in ascending order.*/
+PatternInstance.prototype.gatherNoteSet = function() {
+  var noteStream = this.generateNoteStream(false);
+  var noteNumSet = {};
+
+  for (var i = 0; i < noteStream.notes.length; i++) {
+    for (var j = 0; j < noteStream.notes[i].nums.length; j++) {  // Expand chords.
+      noteNumSet[noteStream.notes[i].nums[j]] = 1;
+    }
+  }
+
+  var sortedNotes = [];
+  for (noteNum in noteNumSet) {
+    sortedNotes.push(noteNum);
+  }
+  sortedNotes.sort();
+  return sortedNoted;
+};
+
 // Delay the timeouts by a constant time to allow initial setup to complete.
 // TODO: is this helpful?
 var DELAY_START_OFFSET = 100;
