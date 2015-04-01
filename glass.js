@@ -586,6 +586,40 @@ PatternInstance.prototype.gatherNoteSet = function() {
   return sortedNoted;
 };
 
+/* Calculate a distance metric between two note sets, which
+   are arrays of note numbers, sorted ascending.
+   Choose from two methods:
+     0 : the sum of the min diff from each note in set1 to
+         any note in set2
+     1 : the sum of distances {abs(set1[0]-set2[0]), then set[1] etc}
+*/
+function calculateNoteSetDifference(set1, set2, method) {
+  if (method == 0) {
+    var sum = 0;
+    for (var i = 0; i < set1.length; i++) {
+      var min = 9999;
+      var min_j = -1;
+      for (var j = 0; j < set2.length; j++) {
+        var diff = Math.abs(set1[i] - set2[j]);
+        if (diff < min) {
+          min = diff;
+        }
+      }
+      sum += min;
+    }
+    return sum;
+  } else if (method == 1) {
+    var sum = 0;
+    var min_length = Math.min(set1.length, set2.length);
+    for (var i = 0; i < min_length; i++) {
+      var diff = Math.abs(set1[i] - set2[i]);
+      sum += diff;
+    }
+    return sum;
+  }
+}
+
+
 // Delay the timeouts by a constant time to allow initial setup to complete.
 // TODO: is this helpful?
 var DELAY_START_OFFSET = 100;
