@@ -350,9 +350,16 @@ Score.prototype.renderIntoDiv = function($div) {
 Sequence.prototype.generateNoteStream = function() {
   var time = {'t': 0};
   var noteStream = new NoteStream();
+  var previousPatternInstance = null;
   this.traverse(function(p /* patternInstance */) {
     var s = p.generateNoteStream(true);
+
+    /* Invert pattern to optimize the voicing, compared to previous pattern. */
+    if (previousPatternInstance != null) {
+      
+    }
     noteStream.notes = noteStream.notes.concat(s.notes);
+    previousPatternInstance = p;
   });
   return noteStream;
 };
@@ -619,6 +626,29 @@ function calculateNoteSetDifference(set1, set2, method) {
   }
 }
 
+function testCalculateNoteSetDifference() {
+  a = [0, 10, 20];
+  b = [5, 10, 20];
+  c = [10, 20, 30];
+  d = [5, 15, 25];
+
+  console.log(calculateNoteSetDifference(a, b, 0));
+  console.log(calculateNoteSetDifference(a, b, 1));
+  console.log(calculateNoteSetDifference(a, c, 0));
+  console.log(calculateNoteSetDifference(a, c, 1));
+  console.log(calculateNoteSetDifference(a, d, 0));
+  console.log(calculateNoteSetDifference(a, d, 1));
+
+  console.log(calculateNoteSetDifference(b, c, 0));
+  console.log(calculateNoteSetDifference(b, c, 1));
+  console.log(calculateNoteSetDifference(b, d, 0));
+  console.log(calculateNoteSetDifference(b, d, 1));
+
+  console.log(calculateNoteSetDifference(c, d, 0));
+  console.log(calculateNoteSetDifference(c, d, 1));
+}
+
+testCalculateNoteSetDifference();
 
 // Delay the timeouts by a constant time to allow initial setup to complete.
 // TODO: is this helpful?
