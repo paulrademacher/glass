@@ -78,13 +78,13 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
   this.noteBase = noteBase;
   this.scaleType = scaleType;
   this.octaveOffset = octaveOffset;
+
+  this.inversion = 0;
   this.id = "p" + ("" + Math.random()).substring(2);
 }
 
-PatternInstance.prototype.generateNoteStream = function(doRepeats) {
+PatternInstance.prototype.generateNoteStream = function(doRepeats, inversion) {
   var note = noteStringToNum(this.noteBase, this.pattern.startOctave + this.octaveOffset);
-
-  // this.optimizeChord(pattern, note, scaleType);  // TODO: enable this.
 
   var noteStream = new NoteStream();
 
@@ -346,16 +346,35 @@ Score.prototype.renderIntoDiv = function($div) {
 Sequence.prototype.generateNoteStream = function() {
   var time = {'t': 0};
   var noteStream = new NoteStream();
-  var previousPatternInstance = null;
+  var previousNoteSet = null;
   this.traverse(function(p /* patternInstance */) {
-    var s = p.generateNoteStream(true);
+    // Invert pattern to optimize the voicing, compared to previous pattern.
+    var thisNoteSet = p.gatherNoteSet();
+    var finalNoteSet = null;
+    var bestInversion = 0;
+    if (previousNoteSet != null) {
+      var bestDiff = 9999;
 
-    /* Invert pattern to optimize the voicing, compared to previous pattern. */
-    if (previousPatternInstance != null) {
+      // Try several inversions.  Keep the best.
+      for (var inversion = -3; inversion <= 3; inversion++) {
+        // Invert the original noteset.
+        var inverted = invertNotes(thisNoteSet, inversion);
+        var diff = calculateNoteSetDifference(previousNoteSet, inverted, 0);
+        if (diff < bestDiff) {
+          bestInversion = inversion;  // Not really needed, just used for debugging.
+          finalNoteSet = inverted;
+          bestDiff = diff;
+        }
+      }
+      console.log("Best inversion:", bestInversion, "  diff:", bestDiff);
+
+      p.inversion = inversion;  // Will be used by p.generateNoteStream()
+      ^^ THIS
       
     }
+    var s = p.generateNoteStream(true);
     noteStream.notes = noteStream.notes.concat(s.notes);
-    previousPatternInstance = p;
+    previousNoteSet = finalNoteSet;
   });
   return noteStream;
 };
