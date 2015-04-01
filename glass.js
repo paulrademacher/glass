@@ -1,5 +1,3 @@
-// TODO: Delete Line object.  It's replaced by Sequence.
-
 function Note(len, nums, patternInstanceId) {
   this.len = len;
 
@@ -13,8 +11,6 @@ function Note(len, nums, patternInstanceId) {
 
 function Score(timeSig) {
   this.timeSig = timeSig;
-  this.left = new Line(timeSig);
-  this.right = new Line(timeSig);
 
   this.leftSeq = new Sequence(1);
   this.rightSeq = new Sequence(1);
@@ -381,51 +377,6 @@ Sequence.prototype.traverseInternal = function(callback) {
   }
 };
 
-function Line(timeSig) {
-  this.timeSig = timeSig;
-  this.notes = [];
-  this.patternInstances = [];
-
-  // We remember the notes of each pattern to optimize the next one.
-  // This is maintained in sorted order.
-  this.prevPatternNotes = [];
-}
-
-/* Optimize newPattern by inverting it until it minimizes the distance
- * against the previously-played (non-empty) pattern. */
-Line.prototype.optimizeChord = function(newPattern, note, scaleType) {
-  var newNotesSet = {};
-  var addedAny = false;
-
-  for (var i = 0; i < newPattern.notes.length; i++) {
-    var nums = newPattern.notes[i].nums;
-
-    for (var j = 0; j < nums.length; j++) {
-      if (nums[j] != -1) {
-        newNotesSet[note + scaleNumToNoteNum(scaleType, nums[j])] = 1;
-        addedAny = true;
-      }
-    }
-  }
-
-  var newNotesArray = [];
-  for (x in newNotesSet) {
-    newNotesArray.push(x);
-  }
-  newNotesArray.sort();
-
-
-  // Calculate total difference in this pattern vs last one.
-  if (addedAny) {  // Ignore this pattern if empty.
-    var diff = 0;
-//    if (
-
-    console.log(this.prevPatternNotes, newNotesArray);
-
-    this.prevPatternNotes = newNotesArray;
-  }
-};
-
 var noteStringToFlat = {
   'C': 'C',
   'C#': 'Db',
@@ -457,15 +408,6 @@ function noteStringToNum(noteString, octaveOffset) {
   var finalNoteString = "" + flatNote + octave;
   return MIDI.keyToNote[finalNoteString];
 }
-
-/* noteBase is a plain note string (e.g., "C") */
-Line.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset) {
-  var patternInstance = new PatternInstance(repeats, pattern, noteBase,
-                                            scaleType, octaveOffset);
-
-  this.patternInstances.push(patternInstance);
-  // TODO: eraseme
-};
 
 function midiNoteToABC(note) {
   // This returns "A4", "C5", ...
