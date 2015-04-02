@@ -129,7 +129,7 @@ function playMetamorphosisThree() {
   var score = new Score(34);
 
   score.multiSeq.addSequence(2, function(seq) {
-    seq.addSequence(2, function(seq) {
+    seq.addSequence(1, function(seq) {
       seq.addPattern(4, pattern6, silence34, "D", "m", 0);
       seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
       seq.addPattern(3, pattern6, silence34, "D", "m", 0);
@@ -255,6 +255,17 @@ function playMadRush() {
   arpeggio1("A", "m");
 
   intro();
+
+  score.play(98, $("#score"));
+}
+
+function testVoicing() {
+  var score = new Score(44);
+
+  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+  score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);
+  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+  score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
 
   score.play(98, $("#score"));
 }

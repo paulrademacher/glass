@@ -79,11 +79,13 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
   this.scaleType = scaleType;
   this.octaveOffset = octaveOffset;
 
-  this.inversion = 0;
+  // A mapping of notes, for inversions.  Key: orig note num.  Val: new note num.
+  this.noteMap = null;
+
   this.id = "p" + ("" + Math.random()).substring(2);
 }
 
-PatternInstance.prototype.generateNoteStream = function(doRepeats, inversion) {
+PatternInstance.prototype.generateNoteStream = function(doRepeats) {
   var note = noteStringToNum(this.noteBase, this.pattern.startOctave + this.octaveOffset);
 
   var noteStream = new NoteStream();
@@ -102,6 +104,15 @@ PatternInstance.prototype.generateNoteStream = function(doRepeats, inversion) {
           actualNums[j] = -1;  // Rest.
         } else {
           actualNums[j] = note + scaleNumToNoteNum(this.scaleType, nums[j]);
+
+          // Apply noteMap (inversion mapping).
+          if (this.noteMap && (actualNums[j] in this.noteMap)) {
+            if (actualNums[j] != this.noteMap[actualNums[j]]) {
+              console.log("Remapping", actualNums[j], "->", this.noteMap[actualNums[j]]);
+            }
+
+            actualNums[j] = this.noteMap[actualNums[j]];
+          }
         }
       }
       noteStream.push(new Note(len, actualNums, this.id));
@@ -346,20 +357,25 @@ Score.prototype.renderIntoDiv = function($div) {
 Sequence.prototype.generateNoteStream = function() {
   var time = {'t': 0};
   var noteStream = new NoteStream();
-  var previousNoteSet = null;
+  var previousNoteSet = {'set': null, 'rnd': Math.random()};
   this.traverse(function(p /* patternInstance */) {
     // Invert pattern to optimize the voicing, compared to previous pattern.
     var thisNoteSet = p.gatherNoteSet();
     var finalNoteSet = null;
     var bestInversion = 0;
-    if (previousNoteSet != null) {
+
+    if (previousNoteSet.set != null &&
+        !(previousNoteSet.set.length == 1 && previousNoteSet.set[0] == -1) // empty bar.
+       ) {
+      // TODO: Deal when notesets are difft sizes.
+
       var bestDiff = 9999;
 
       // Try several inversions.  Keep the best.
       for (var inversion = -3; inversion <= 3; inversion++) {
         // Invert the original noteset.
         var inverted = invertNotes(thisNoteSet, inversion);
-        var diff = calculateNoteSetDifference(previousNoteSet, inverted, 0);
+        var diff = calculateNoteSetDifference(previousNoteSet.set, inverted, 0);
         if (diff < bestDiff) {
           bestInversion = inversion;  // Not really needed, just used for debugging.
           finalNoteSet = inverted;
@@ -367,12 +383,21 @@ Sequence.prototype.generateNoteStream = function() {
         }
       }
       console.log("Best inversion:", bestInversion, "  diff:", bestDiff);
+      console.log(previousNoteSet.set);
+      console.log(thisNoteSet);
+      console.log(finalNoteSet);
 
-      p.inversion = inversion;  // Will be used by p.generateNoteStream()
+      // Remapping info for p.generateNoteStream().
+      p.noteMap = {};
+      for (var i = 0; i < Math.min(thisNoteSet.length, finalNoteSet.length); i++) {
+        p.noteMap[thisNoteSet[i]] = finalNoteSet[i];
+      }
+    } else {
+      finalNoteSet = thisNoteSet;
     }
     var s = p.generateNoteStream(true);
     noteStream.notes = noteStream.notes.concat(s.notes);
-    previousNoteSet = finalNoteSet;
+    previousNoteSet.set = finalNoteSet;
   });
   return noteStream;
 };
@@ -564,10 +589,11 @@ PatternInstance.prototype.gatherNoteSet = function() {
 
   var sortedNotes = [];
   for (noteNum in noteNumSet) {
-    sortedNotes.push(noteNum);
+    // noteNum is here a string, because it's a Object key.
+    sortedNotes.push(parseInt(noteNum));
   }
   sortedNotes.sort();
-  return sortedNoted;
+  return sortedNotes;
 };
 
 /* Calculate a distance metric between two note sets, which
@@ -624,8 +650,6 @@ function testCalculateNoteSetDifference() {
   console.log(calculateNoteSetDifference(c, d, 0));
   console.log(calculateNoteSetDifference(c, d, 1));
 }
-
-testCalculateNoteSetDifference();
 
 // Delay the timeouts by a constant time to allow initial setup to complete.
 // TODO: is this helpful?
