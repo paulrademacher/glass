@@ -83,6 +83,8 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
   this.noteMap = null;
 
   this.id = "p" + ("" + Math.random()).substring(2);
+
+  this.noteSet = this.gatherNoteSet();
 }
 
 PatternInstance.prototype.generateNoteStream = function(doRepeats) {
@@ -107,10 +109,6 @@ PatternInstance.prototype.generateNoteStream = function(doRepeats) {
 
           // Apply noteMap (inversion mapping).
           if (this.noteMap && (actualNums[j] in this.noteMap)) {
-            if (actualNums[j] != this.noteMap[actualNums[j]]) {
-              console.log("Remapping", actualNums[j], "->", this.noteMap[actualNums[j]]);
-            }
-
             actualNums[j] = this.noteMap[actualNums[j]];
           }
         }
@@ -261,6 +259,13 @@ function Sequence(repeats) {
 Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset, callback) {
   var patternInstance = new PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset);
   var item = new SequenceItem(PATTERN_INSTANCE, patternInstance);
+
+  var numItems = this.items.length;
+  if (numItems > 0 && this.items[numItems - 1].type == PATTERN_INSTANCE) {
+    patternInstance.noteMap = calculateBestInversion(this.items[numItems - 1].item.noteSet,
+                                                     patternInstance.noteSet);
+  }
+
   this.items.push(item);
   if (callback) {
     callback(patternInstance);
@@ -278,6 +283,34 @@ Sequence.prototype.addSequence = function(repeats, callback) {
   }
   return sequence;
 };
+
+/* Calculate the inversion of noteSet2 which most closely matches noteSet1.
+   Returns a note mapping (hash of int->int). */
+function calculateBestInversion(noteSet1, noteSet2) {
+  var bestDiff = 9999;
+  var bestInversion = 0;
+  var finalNoteSet = null;
+
+  // Try several inversions.  Keep the best.
+  for (var inversion = -3; inversion <= 3; inversion++) {
+    // Invert the second noteset.
+    var inverted = invertNotes(noteSet2, inversion);
+    var diff = calculateNoteSetDifference(noteSet1, inverted, 0);
+    if (diff < bestDiff) {
+      bestInversion = inversion;  // Just used for debugging output.
+      finalNoteSet = inverted;
+      bestDiff = diff;
+    }
+  }
+
+  // Remaping info for p.generateNoteStream().
+  var noteMap = {};
+  for (var i = 0; i < Math.min(noteSet1.length, noteSet2.length); i++) {
+    noteMap[noteSet2[i]] = finalNoteSet[i];
+  }
+
+  return noteMap;
+}
 
 function MultiChannelSequence(leftSeq, rightSeq) {
   this.leftSeq = leftSeq;
@@ -360,11 +393,12 @@ Sequence.prototype.generateNoteStream = function() {
   var previousNoteSet = {'set': null, 'rnd': Math.random()};
   this.traverse(function(p /* patternInstance */) {
     // Invert pattern to optimize the voicing, compared to previous pattern.
-    var thisNoteSet = p.gatherNoteSet();
+    var thisNoteSet = p.noteSet;
     var finalNoteSet = null;
     var bestInversion = 0;
 
     if (previousNoteSet.set != null &&
+        false && // !!!!
         !(previousNoteSet.set.length == 1 && previousNoteSet.set[0] == -1) // empty bar.
        ) {
       // TODO: Deal when notesets are difft sizes.
@@ -382,10 +416,6 @@ Sequence.prototype.generateNoteStream = function() {
           bestDiff = diff;
         }
       }
-      console.log("Best inversion:", bestInversion, "  diff:", bestDiff);
-      console.log(previousNoteSet.set);
-      console.log(thisNoteSet);
-      console.log(finalNoteSet);
 
       // Remapping info for p.generateNoteStream().
       p.noteMap = {};

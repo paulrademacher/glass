@@ -202,7 +202,7 @@ function playMadRush() {
   function intro() {
     score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
     score.rightSeq.addPattern(2, silence44, "F", "M", 0);
-    score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);  // TODO: Really, Am, but sounds bad until we optimize inversion.
+    score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
     score.rightSeq.addPattern(1, whole44, "C", "M", -1);
     score.rightSeq.addPattern(1, silence44, "F", "M", 0);
   }
@@ -210,7 +210,7 @@ function playMadRush() {
   function theme1() {
     score.multiSeq.addSequence(2, function(seq) {
       seq.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-      seq.leftSeq.addPattern(2, pattern16, "F", "M7", 0);
+      seq.leftSeq.addPattern(2, pattern16, "A", "m", 0);
       seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
       seq.rightSeq.addPattern(2, pattern18, "A", "m", 0);
     });
@@ -230,7 +230,7 @@ function playMadRush() {
   function segue() {
     score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
     score.rightSeq.addPattern(2, silence44, "F", "M", 0);
-    score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);  // TODO: Really, Am, but sounds bad until we optimize inversion.
+    score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
     score.rightSeq.addPattern(1, whole44, "A", "M", -2);
     score.rightSeq.addPattern(1, silence44, "F", "M", 0);
   }
