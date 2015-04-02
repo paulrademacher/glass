@@ -369,8 +369,6 @@ Sequence.prototype.generateNoteStream = function() {
       console.log("Best inversion:", bestInversion, "  diff:", bestDiff);
 
       p.inversion = inversion;  // Will be used by p.generateNoteStream()
-      ^^ THIS
-      
     }
     var s = p.generateNoteStream(true);
     noteStream.notes = noteStream.notes.concat(s.notes);
@@ -378,6 +376,24 @@ Sequence.prototype.generateNoteStream = function() {
   });
   return noteStream;
 };
+
+function invertNotes(noteSet, inversion) {
+  var newNoteSet = noteSet.slice();  // Make copy.
+  if (inversion > 0) {
+    for (var i = 0; i < inversion; i++) {
+      var first = newNoteSet.shift();
+      first += 12;
+      newNoteSet = newNoteSet.concat(first);
+    }
+  } else if (inversion < 0) {
+    for (var i = 0; i < -inversion; i++) {
+      var last = newNoteSet.pop();
+      last -= 12;
+      newNoteSet = [last].concat(newNoteSet);
+    }
+  }
+  return newNoteSet;
+}
 
 Sequence.prototype.traverse = function(callback) {
   this.traverseInternal(callback);
@@ -661,6 +677,7 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
   allTimeouts.push(timeout);
 }
 
+// ERASE THIS
 /* notes is an array of note numbers.
  * direction is positive or negative number of inversions. */
 function invert12(notes, direction) {
