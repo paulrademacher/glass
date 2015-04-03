@@ -212,7 +212,7 @@ function playMadRush() {
       seq.leftSeq.addPattern(2, pattern16, "F", "M");
       seq.leftSeq.addPattern(2, pattern16, "A", "m");
       seq.rightSeq.addPattern(2, pattern17, "F", "M");
-      seq.rightSeq.addPattern(2, pattern18, "A", "m");
+      seq.rightSeq.addPattern(2, pattern18, "A", "m", {'pinVoicing': true});
     });
   }
 
@@ -230,8 +230,8 @@ function playMadRush() {
   function segue() {
     score.leftSeq.addPattern(2, pattern16, "F", "M");
     score.rightSeq.addPattern(2, silence44, "F", "M");
-    score.leftSeq.addPattern(2, pattern16, "A", "m");
-    score.rightSeq.addPattern(1, whole44, "A", "M", {'octaveOffset': -2});
+    score.leftSeq.addPattern(2, pattern16, "A", "m", {'pinVoicing': true});
+    score.rightSeq.addPattern(1, whole44, "A", "M");
     score.rightSeq.addPattern(1, silence44, "F", "M");
   }
 

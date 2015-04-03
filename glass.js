@@ -84,6 +84,7 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, options) {
   this.noteBase = noteBase;
   this.scaleType = scaleType;
   this.octaveOffset = options.octaveOffset || 0;
+  this.pinVoicing = options.pinVoicing || false;
 
   // A mapping of notes, for inversions.  Key: orig note num.  Val: new note num.
   this.noteMap = null;
@@ -267,7 +268,8 @@ Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, 
   var item = new SequenceItem(PATTERN_INSTANCE, patternInstance);
 
   var numItems = this.items.length;
-  if (numItems > 0 && this.items[numItems - 1].type == PATTERN_INSTANCE) {
+  if (!patternInstance.pinVoicing &&
+      numItems > 0 && this.items[numItems - 1].type == PATTERN_INSTANCE) {
     patternInstance.noteMap = calculateBestInversion(this.items[numItems - 1].item.noteSet,
                                                      patternInstance.noteSet);
   }
