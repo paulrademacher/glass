@@ -344,7 +344,7 @@ MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patte
 };
 
 Sequence.prototype.renderIntoDiv = function($div) {
-  var $sub = $("<div>").css("border", "1px solid silver").css("padding", "8px").css("margin", "8px");
+  var $sub = $("<div>").css("border-left", "1px solid silver").css("padding", "8px").css("margin", "8px");
   $div.append($sub);
   $sub.append($("<div>").text("x" + this.repeats).css("font-style", "italic"));
   for (var i = 0; i < this.items.length; i++) {
@@ -358,7 +358,10 @@ Sequence.prototype.renderIntoDiv = function($div) {
       $sub.append($notationParent);
 
       var header = "M:none\n%%staves P1\nV:P1 name=\"x" + patternInstance.repeats + "\"";
-      if (patternInstance.pattern.startOctave < -1) {
+
+      // Decide whether to display in bass clef.
+      if (patternInstance.noteSet[0] < 55 /* low G */ ||
+          patternInstance.noteSet[patternInstance.noteSet.length - 1] < 60 /* mid C */) {
         header += " clef=bass ";
       }
       header += "\n";
@@ -383,9 +386,9 @@ Sequence.prototype.renderIntoDiv = function($div) {
 
 Score.prototype.renderIntoDiv = function($div) {
   var $leftDiv = $("<div>").attr("id", "leftNotation").
-    css("border", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Left");
+    css("border-left", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Left");
   var $rightDiv = $("<div>").attr("id", "rightNotation").
-    css("border", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Right");
+    css("border-left", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Right");
 
   this.leftSeq.renderIntoDiv($leftDiv);
   this.rightSeq.renderIntoDiv($rightDiv);
@@ -679,13 +682,13 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
     if (patternId != noteStream.currentPatternId) {
       if (noteStream.currentPatternId != "") {
         // Hide old highlight.
-        $("#" + noteStream.currentPatternId).css("border", "1px solid white");
+        $("#" + noteStream.currentPatternId).css("border-left", "1px solid white");
         $("#" + noteStream.currentPatternId).css("background-color", "white");
       }
       // Highlight new.
       var highlightId = "#" + patternId;
-      $(highlightId).css("border", "1px solid blue");
-      $(highlightId).css("background-color", "#fcfcff");
+      $(highlightId).css("border-left", "1px solid blue");
+      $(highlightId).css("background-color", "#f0f0ff");
       $(highlightId).scrollintoview();
 
       noteStream.currentPatternId = patternId;
