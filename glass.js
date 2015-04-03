@@ -291,11 +291,18 @@ function calculateBestInversion(noteSet1, noteSet2) {
   var bestInversion = 0;
   var finalNoteSet = null;
 
+  if ((noteSet1.length == 1 && noteSet1[0] == -1) ||
+      (noteSet2.length == 1 && noteSet2[0] == -1)) {
+    // One of them is just silence.
+    return {};
+  }
+
   // Try several inversions.  Keep the best.
-  for (var inversion = -3; inversion <= 3; inversion++) {
+  for (var inversion = -2; inversion <= 2; inversion++) {
     // Invert the second noteset.
     var inverted = invertNotes(noteSet2, inversion);
     var diff = calculateNoteSetDifference(noteSet1, inverted, 0);
+
     if (diff < bestDiff) {
       bestInversion = inversion;  // Just used for debugging output.
       finalNoteSet = inverted;
@@ -350,7 +357,7 @@ Sequence.prototype.renderIntoDiv = function($div) {
       $notationParent.append($notation);
       $sub.append($notationParent);
 
-      var header = "%%staves P1\nV:P1 name=\"x" + patternInstance.repeats + "\"";
+      var header = "M:none\n%%staves P1\nV:P1 name=\"x" + patternInstance.repeats + "\"";
       if (patternInstance.pattern.startOctave < -1) {
         header += " clef=bass ";
       }
@@ -388,46 +395,10 @@ Score.prototype.renderIntoDiv = function($div) {
 };
 
 Sequence.prototype.generateNoteStream = function() {
-  var time = {'t': 0};
   var noteStream = new NoteStream();
-  var previousNoteSet = {'set': null, 'rnd': Math.random()};
   this.traverse(function(p /* patternInstance */) {
-    // Invert pattern to optimize the voicing, compared to previous pattern.
-    var thisNoteSet = p.noteSet;
-    var finalNoteSet = null;
-    var bestInversion = 0;
-
-    if (previousNoteSet.set != null &&
-        false && // !!!!
-        !(previousNoteSet.set.length == 1 && previousNoteSet.set[0] == -1) // empty bar.
-       ) {
-      // TODO: Deal when notesets are difft sizes.
-
-      var bestDiff = 9999;
-
-      // Try several inversions.  Keep the best.
-      for (var inversion = -3; inversion <= 3; inversion++) {
-        // Invert the original noteset.
-        var inverted = invertNotes(thisNoteSet, inversion);
-        var diff = calculateNoteSetDifference(previousNoteSet.set, inverted, 0);
-        if (diff < bestDiff) {
-          bestInversion = inversion;  // Not really needed, just used for debugging.
-          finalNoteSet = inverted;
-          bestDiff = diff;
-        }
-      }
-
-      // Remapping info for p.generateNoteStream().
-      p.noteMap = {};
-      for (var i = 0; i < Math.min(thisNoteSet.length, finalNoteSet.length); i++) {
-        p.noteMap[thisNoteSet[i]] = finalNoteSet[i];
-      }
-    } else {
-      finalNoteSet = thisNoteSet;
-    }
     var s = p.generateNoteStream(true);
     noteStream.notes = noteStream.notes.concat(s.notes);
-    previousNoteSet.set = finalNoteSet;
   });
   return noteStream;
 };
@@ -636,10 +607,9 @@ PatternInstance.prototype.gatherNoteSet = function() {
 function calculateNoteSetDifference(set1, set2, method) {
   if (method == 0) {
     var sum = 0;
-    for (var i = 0; i < set1.length; i++) {
+    for (var j = 0; j < set2.length; j++) {
       var min = 9999;
-      var min_j = -1;
-      for (var j = 0; j < set2.length; j++) {
+      for (var i = 0; i < set1.length; i++) {
         var diff = Math.abs(set1[i] - set2[j]);
         if (diff < min) {
           min = diff;

@@ -262,10 +262,17 @@ function playMadRush() {
 function testVoicing() {
   var score = new Score(44);
 
-  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
+  score.multiSeq.addSequence(1, function(seq) {
+    seq.rightSeq.addPattern(1, pattern19, "G", "m", 0);
+    seq.rightSeq.addPattern(1, pattern20, "G", "m", 0);
+//    seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
+  });
+
+/*  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
   score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);
   score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
   score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
+*/
 
   score.play(98, $("#score"));
 }
