@@ -18,14 +18,12 @@
       }
 
       #leftNotation {
-        border: 1px solid silver;
         float: left;
         width: 400px;
       }
 
       #rightNotation {
         float: left;
-        border: 1px solid silver;
         width: 400px;
       }
 
@@ -47,12 +45,19 @@
           }
         });
       };
+
+      function loadScore(name) {
+         $.getScript(name, function(script, textStatus, jqXHR) {
+           alert(script);
+         });
+      }
     </script>
 </head>
 <body onload='onload()'>
 <div>
   <button onclick='playEtude12()'>Etude 12</button>
   <button onclick='playMetamorphosisThree()'>Metamorphosis Three</button>
+  <button onclick='loadScore("metamorphosis3.js")'>Metamorphosis Three (JS)</button>
   <button onclick='playMadRush()'>Mad Rush</button>
   <button onclick='testVoicing()'>test voicings</button>
 

@@ -226,25 +226,27 @@ function noteLenToMs(tempo, noteLen) {
 
 /* Convert a note length (1, 2, 4, etc) to an ABC note length, assuming
    the ABC unit is an eighth note. */
-function noteLenToABC(noteLen) {
+function noteLenToABC(abcNote, noteLen) {
   if (noteLen == 4) {
-    return "2";
+    return abcNote + "2";
   } else if (noteLen == 8) {
-    return "";
+    return abcNote;
   } else if (noteLen == 1) {
-    return "8";
+    return abcNote + "8";
   } else if (noteLen == 45) {
-    return "3";
+    return abcNote + "3";
   } else if (noteLen == 30) {
-    return "6";
+    return abcNote + "6";
   } else if (noteLen == 2) {
-    return "4";
+    return abcNote + "4";
   } else if (noteLen == 3) {
-    // TODO: tuplets are prefixed;
-    return "";
+    return "(3" + abcNote;
+  } else if (noteLen == 5) {
+    return "(5" + abcNote;
   } else if (noteLen == 6) {
-    // TODO: tuplets are prefixed;
-    return "";
+    return "(6" + abcNote;
+  } else if (noteLen == 7) {
+    return "(7" + abcNote;
   }
 }
 
@@ -359,13 +361,19 @@ Sequence.prototype.renderIntoDiv = function($div) {
     var item = this.items[i];
     if (item.type == PATTERN_INSTANCE) {
       var patternInstance = item.item;
+
+      if (patternInstance.noteSet.length == 1 && patternInstance.noteSet[0] == -1) {
+        // This is just silence, so don't render it.
+        continue;
+      }
+
       var $notationParent = $("<div>").css("height", "80px").css("width", "300px").
         attr("id", patternInstance.id).addClass("patternInstance");
       var $notation = $("<div>");
       $notationParent.append($notation);
       $sub.append($notationParent);
 
-      var header = "M:none\n%%staves P1\nV:P1 name=\"x" + patternInstance.repeats + "\"";
+      var header = "M:none\n%%staves P1\nV:P1" ;// name=\"x" + patternInstance.repeats + "\"";
 
       // Decide whether to display in bass clef.
       if (patternInstance.noteSet[0] < 55 /* low G */ ||
@@ -393,10 +401,8 @@ Sequence.prototype.renderIntoDiv = function($div) {
 };
 
 Score.prototype.renderIntoDiv = function($div) {
-  var $leftDiv = $("<div>").attr("id", "leftNotation").
-    css("border-left", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Left");
-  var $rightDiv = $("<div>").attr("id", "rightNotation").
-    css("border-left", "1px solid silver").css("margin", "8px").css("padding", "8px").text("Right");
+  var $leftDiv = $("<div>").attr("id", "leftNotation").css("margin", "8px").css("padding", "8px").text("Left");
+  var $rightDiv = $("<div>").attr("id", "rightNotation").css("margin", "8px").css("padding", "8px").text("Right");
 
   this.leftSeq.renderIntoDiv($leftDiv);
   this.rightSeq.renderIntoDiv($rightDiv);
@@ -572,7 +578,7 @@ PatternInstance.prototype.toABC = function() {
         // Rest.
         abcNote = 'z';
       }
-      s.push(abcNote + noteLenToABC(len));
+      s.push(noteLenToABC(abcNote, len));
       isFirstNote = false;
     }
     if (nums.length > 1) {
@@ -695,8 +701,8 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
       }
       // Highlight new.
       var highlightId = "#" + patternId;
-      $(highlightId).css("border-left", "1px solid blue");
-      $(highlightId).css("background-color", "#f0f0ff");
+      $(highlightId).css("border-left", "1px solid white");
+      $(highlightId).css("background-color", "#B2C6E0"); //"#f0f0ff");
       $(highlightId).scrollintoview();
 
       noteStream.currentPatternId = patternId;
