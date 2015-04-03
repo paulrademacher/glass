@@ -130,28 +130,28 @@ function playMetamorphosisThree() {
 
   score.multiSeq.addSequence(2, function(seq) {
     seq.addSequence(1, function(seq) {
-      seq.addPattern(4, pattern6, silence34, "D", "m", 0);
-      seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-      seq.addPattern(3, pattern6, silence34, "D", "m", 0);
+      seq.addPattern(4, pattern6, silence34, "D", "m");
+      seq.addPattern(1, pattern6, pattern8, "D", "m");  // Bass crossover.
+      seq.addPattern(3, pattern6, silence34, "D", "m");
     });
-    seq.addPattern(2, pattern6, pattern7, "D", "m", 0);
-    seq.addPattern(2, pattern6, pattern7, "D", "mM", 0);
-    seq.addPattern(2, pattern6, pattern7, "G", "m", 0);
-    seq.addPattern(2, pattern6, pattern7, "Eb", "M", 0);
-    seq.addPattern(2, pattern6, pattern7, "C", "M", 0);
-    seq.addPattern(2, pattern6, pattern7, "A", "M", 0);
+    seq.addPattern(2, pattern6, pattern7, "D", "m");
+    seq.addPattern(2, pattern6, pattern7, "D", "mM");
+    seq.addPattern(2, pattern6, pattern7, "G", "m");
+    seq.addPattern(2, pattern6, pattern7, "Eb", "M");
+    seq.addPattern(2, pattern6, pattern7, "C", "M");
+    seq.addPattern(2, pattern6, pattern7, "A", "M");
 
     seq.addSequence(1, function(seq) {
-      seq.addPattern(4, pattern6, silence34, "D", "m", 0);
-      seq.addPattern(1, pattern6, pattern8, "D", "m", 0);  // Bass crossover.
-      seq.addPattern(3, pattern6, silence34, "D", "m", 0);
+      seq.addPattern(4, pattern6, silence34, "D", "m");
+      seq.addPattern(1, pattern6, pattern8, "D", "m");  // Bass crossover.
+      seq.addPattern(3, pattern6, silence34, "D", "m");
     });
 
     seq.addSequence(2, function(seq) {
-      seq.addPattern(2, pattern6, pattern11, "D", "M", 0);
-      seq.addPattern(1, pattern6, pattern7, "F#", "M", 0);
-      seq.addPattern(1, pattern6, pattern7, "F#", "7", 0);
-      seq.addPattern(4, pattern6, pattern11, "D", "M", 0);
+      seq.addPattern(2, pattern6, pattern11, "D", "M");
+      seq.addPattern(1, pattern6, pattern7, "F#", "M");
+      seq.addPattern(1, pattern6, pattern7, "F#", "7");
+      seq.addPattern(4, pattern6, pattern11, "D", "M");
     });
   });
 
@@ -161,36 +161,36 @@ function playMetamorphosisThree() {
 function playEtude12() {
   var score = new Score(34);
 
-  score.leftSeq.addPattern(8, pattern12, "D", "m", -1);
-  score.rightSeq.addPattern(4, silence44, "D", "m", -1);
+  score.leftSeq.addPattern(8, pattern12, "D", "m", {'octaveOffset': -1});
+  score.rightSeq.addPattern(4, silence44, "D", "m", {'octaveOffset': -1});
 
   score.multiSeq.addSequence(2, function(seq) {
-    seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-    seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
+    seq.leftSeq.addPattern(6, pattern12, "D", "m", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(8, pattern13, "D", "m", {'octaveOffset': -1});
   });
 
   score.multiSeq.addSequence(2, function(seq) {
-    seq.leftSeq.addPattern(6, pattern14, "Bb", "M", -1);
-    seq.rightSeq.addPattern(8, pattern15, "Bb", "M", -1);
-    seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-    seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
+    seq.leftSeq.addPattern(6, pattern14, "Bb", "M", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(8, pattern15, "Bb", "M", {'octaveOffset': -1});
+    seq.leftSeq.addPattern(6, pattern12, "D", "m", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(8, pattern13, "D", "m", {'octaveOffset': -1});
   });
 
-  score.leftSeq.addPattern(6, pattern14, "Bb", "M", -1);
-  score.rightSeq.addPattern(8, pattern15, "Bb", "M", -1);
+  score.leftSeq.addPattern(6, pattern14, "Bb", "M", {'octaveOffset': -1});
+  score.rightSeq.addPattern(8, pattern15, "Bb", "M", {'octaveOffset': -1});
 
   score.multiSeq.addSequence(2, function(seq) {
-    seq.leftSeq.addPattern(6, pattern12, "D", "m", -1);
-    seq.rightSeq.addPattern(8, pattern13, "D", "m", -1);
+    seq.leftSeq.addPattern(6, pattern12, "D", "m", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(8, pattern13, "D", "m", {'octaveOffset': -1});
   });
 
   score.multiSeq.addSequence(2, function(seq) {
-    seq.leftSeq.addPattern(6, pattern14, "A", "M", -1);
-    seq.rightSeq.addPattern(8, pattern15, "A", "M", -1);
-    seq.leftSeq.addPattern(3, pattern12, "D", "m", -1);
-    seq.rightSeq.addPattern(4, pattern13, "D", "m", -1);
-    seq.leftSeq.addPattern(3, pattern12, "D", "M", -1);
-    seq.rightSeq.addPattern(4, pattern13, "D", "M", -1);
+    seq.leftSeq.addPattern(6, pattern14, "A", "M", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(8, pattern15, "A", "M", {'octaveOffset': -1});
+    seq.leftSeq.addPattern(3, pattern12, "D", "m", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(4, pattern13, "D", "m", {'octaveOffset': -1});
+    seq.leftSeq.addPattern(3, pattern12, "D", "M", {'octaveOffset': -1});
+    seq.rightSeq.addPattern(4, pattern13, "D", "M", {'octaveOffset': -1});
   });
 
   score.play(170, $("#score"));
@@ -200,44 +200,44 @@ function playMadRush() {
   var score = new Score(44);
 
   function intro() {
-    score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-    score.rightSeq.addPattern(2, silence44, "F", "M", 0);
-    score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
-    score.rightSeq.addPattern(1, whole44, "C", "M", -1);
-    score.rightSeq.addPattern(1, silence44, "F", "M", 0);
+    score.leftSeq.addPattern(2, pattern16, "F", "M");
+    score.rightSeq.addPattern(2, silence44, "F", "M");
+    score.leftSeq.addPattern(2, pattern16, "A", "m");
+    score.rightSeq.addPattern(1, whole44, "C", "M", {'octaveOffset': -1});
+    score.rightSeq.addPattern(1, silence44, "F", "M");
   }
 
   function theme1() {
     score.multiSeq.addSequence(2, function(seq) {
-      seq.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-      seq.leftSeq.addPattern(2, pattern16, "A", "m", 0);
-      seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
-      seq.rightSeq.addPattern(2, pattern18, "A", "m", 0);
+      seq.leftSeq.addPattern(2, pattern16, "F", "M");
+      seq.leftSeq.addPattern(2, pattern16, "A", "m");
+      seq.rightSeq.addPattern(2, pattern17, "F", "M");
+      seq.rightSeq.addPattern(2, pattern18, "A", "m");
     });
   }
 
   function theme2() {
     score.multiSeq.addSequence(2, function(seq) {
-      seq.leftSeq.addPattern(2, pattern16, "G", "m", 0);
-      seq.rightSeq.addPattern(1, pattern19, "G", "m", 0);
-      seq.rightSeq.addPattern(1, pattern20, "G", "m", 0);
+      seq.leftSeq.addPattern(2, pattern16, "G", "m");
+      seq.rightSeq.addPattern(1, pattern19, "G", "m");
+      seq.rightSeq.addPattern(1, pattern20, "G", "m");
 
-      seq.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-      seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
+      seq.leftSeq.addPattern(2, pattern16, "F", "M");
+      seq.rightSeq.addPattern(2, pattern17, "F", "M");
     });
   }
 
   function segue() {
-    score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-    score.rightSeq.addPattern(2, silence44, "F", "M", 0);
-    score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
-    score.rightSeq.addPattern(1, whole44, "A", "M", -2);
-    score.rightSeq.addPattern(1, silence44, "F", "M", 0);
+    score.leftSeq.addPattern(2, pattern16, "F", "M");
+    score.rightSeq.addPattern(2, silence44, "F", "M");
+    score.leftSeq.addPattern(2, pattern16, "A", "m");
+    score.rightSeq.addPattern(1, whole44, "A", "M", {'octaveOffset': -2});
+    score.rightSeq.addPattern(1, silence44, "F", "M");
   }
 
   function arpeggio1(noteBase, scaleType) {
-    score.leftSeq.addPattern(8, pattern23, noteBase, scaleType, -1);
-    score.rightSeq.addPattern(8, pattern22, noteBase, scaleType, 0);
+    score.leftSeq.addPattern(8, pattern23, noteBase, scaleType, {'octaveOffset': -1});
+    score.rightSeq.addPattern(8, pattern22, noteBase, scaleType);
   }
 
   intro();
@@ -246,8 +246,8 @@ function playMadRush() {
   segue();
 
   // Dramatic pause!
-  score.leftSeq.addPattern(1, silencehalf, "F", "M", 0);
-  score.rightSeq.addPattern(1, silencehalf, "F", "M", 0);
+  score.leftSeq.addPattern(1, silencehalf, "F", "M");
+  score.rightSeq.addPattern(1, silencehalf, "F", "M");
 
   arpeggio1("F", "M");
   arpeggio1("A", "m");
@@ -263,15 +263,15 @@ function testVoicing() {
   var score = new Score(44);
 
   score.multiSeq.addSequence(1, function(seq) {
-    seq.rightSeq.addPattern(1, pattern19, "G", "m", 0);
-    seq.rightSeq.addPattern(1, pattern20, "G", "m", 0);
-//    seq.rightSeq.addPattern(2, pattern17, "F", "M", 0);
+    seq.rightSeq.addPattern(1, pattern19, "G", "m");
+    seq.rightSeq.addPattern(1, pattern20, "G", "m");
+//    seq.rightSeq.addPattern(2, pattern17, "F", "M");
   });
 
-/*  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-  score.leftSeq.addPattern(2, pattern16, "F", "M7", 0);
-  score.leftSeq.addPattern(2, pattern16, "F", "M", 0);
-  score.leftSeq.addPattern(2, pattern16, "A", "m", 0);
+/*  score.leftSeq.addPattern(2, pattern16, "F", "M");
+  score.leftSeq.addPattern(2, pattern16, "F", "M7");
+  score.leftSeq.addPattern(2, pattern16, "F", "M");
+  score.leftSeq.addPattern(2, pattern16, "A", "m");
 */
 
   score.play(98, $("#score"));

@@ -72,12 +72,18 @@ NoteStream.prototype.play = function(tempo) {
   }
 };
 
-function PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset) {
+/* options is a dict that can contain:
+   - octaveOffset: int
+   - pinVoicing: bool  - if true, do not optimize the chord inversion
+*/
+function PatternInstance(repeats, pattern, noteBase, scaleType, options) {
+  options = options || {};
+
   this.repeats = repeats;
   this.pattern = pattern;
   this.noteBase = noteBase;
   this.scaleType = scaleType;
-  this.octaveOffset = octaveOffset;
+  this.octaveOffset = options.octaveOffset || 0;
 
   // A mapping of notes, for inversions.  Key: orig note num.  Val: new note num.
   this.noteMap = null;
@@ -256,8 +262,8 @@ function Sequence(repeats) {
 }
 
 // Callback is optional.  Will be called with new PatternInstance.
-Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, octaveOffset, callback) {
-  var patternInstance = new PatternInstance(repeats, pattern, noteBase, scaleType, octaveOffset);
+Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, options, callback) {
+  var patternInstance = new PatternInstance(repeats, pattern, noteBase, scaleType, options);
   var item = new SequenceItem(PATTERN_INSTANCE, patternInstance);
 
   var numItems = this.items.length;
@@ -334,12 +340,12 @@ MultiChannelSequence.prototype.addSequence = function(repeats, callback) {
 };
 
 MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patternRight, noteBase,
-                                                     scaleType, octaveOffset) {
+                                                     scaleType, options) {
   if (patternLeft) {
-    this.leftSeq.addPattern(repeats, patternLeft, noteBase, scaleType, octaveOffset, null);
+    this.leftSeq.addPattern(repeats, patternLeft, noteBase, scaleType, options, null);
   }
   if (patternRight) {
-    this.rightSeq.addPattern(repeats, patternRight, noteBase, scaleType, octaveOffset, null);
+    this.rightSeq.addPattern(repeats, patternRight, noteBase, scaleType, options, null);
   }
 };
 
