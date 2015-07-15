@@ -1,3 +1,5 @@
+var muted = false;
+
 function Note(len, nums, patternInstanceId) {
   this.len = len;
 
@@ -270,10 +272,12 @@ Sequence.prototype.addPattern = function(repeats, pattern, noteBase, scaleType, 
   var item = new SequenceItem(PATTERN_INSTANCE, patternInstance);
 
   var numItems = this.items.length;
-  if (!patternInstance.pinVoicing &&
-      numItems > 0 && this.items[numItems - 1].type == PATTERN_INSTANCE) {
-    patternInstance.noteMap = calculateBestInversion(this.items[numItems - 1].item.noteSet,
-                                                     patternInstance.noteSet);
+  if (numItems > 0 && this.items[numItems - 1].type == PATTERN_INSTANCE) {
+    var previousPatternInstance = this.items[numItems - 1].item;
+    if (!patternInstance.pinVoicing) {
+      patternInstance.noteMap = calculateBestInversion(previousPatternInstance.noteSet,
+                                                       patternInstance.noteSet);
+    }
   }
 
   this.items.push(item);
@@ -376,7 +380,7 @@ Sequence.prototype.renderIntoDiv = function($div) {
       var header = "M:none\n%%staves P1\nV:P1" ;// name=\"x" + patternInstance.repeats + "\"";
 
       // Decide whether to display in bass clef.
-      if (patternInstance.noteSet[0] < 55 /* low G */ ||
+      if (patternInstance.noteSet[0] <= 55 /* low G */ ||
           patternInstance.noteSet[patternInstance.noteSet.length - 1] < 60 /* mid C */) {
         header += " clef=bass ";
       }
@@ -690,7 +694,9 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
     if (note >= 0) {
       // note=-1 is a rest.  But we still want to invoke this function to get the
       // css highlight below.
-      MIDI.noteOn(0, note, velocity, 0);
+      if (!muted) {
+        MIDI.noteOn(0, note, velocity, 0);
+      }
     }
 
     if (patternId != noteStream.currentPatternId) {
@@ -710,7 +716,9 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
 
     if (note >= 0) {
       var timeout = setTimeout(function() {
-        MIDI.noteOff(0, note, 30, 0);
+        if (!muted) {
+          MIDI.noteOff(0, note, 30, 0);
+        }
       }, Math.max(0, len));
       allTimeouts.push(timeout);
     }
