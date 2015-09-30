@@ -14,23 +14,40 @@
     <script src="pieces.js"></script>
 
     <style>
-      body {
-        font-family: helvetica, arial;
-      }
+     body {
+         font-family: helvetica, arial;
+     }
 
-      #leftNotation {
-        float: left;
-        width: 400px;
-      }
+     #leftNotation {
+         float: left;
+         width: 400px;
+     }
 
-      #rightNotation {
-        float: left;
-        width: 400px;
-      }
+     #rightNotation {
+         float: left;
+         width: 400px;
+     }
 
-      .patternInstance {
-        border: 1px solid white;
-      }
+     #left_column_cell {
+         width: 400px;
+         vertical-align: top;
+     }
+
+     #right_column_cell {
+         width: 400px;
+         vertical-align: top;
+     }
+
+     #left_column, #right_column {
+         overflow-y: scroll;
+     }
+
+     .patternInstance {
+         border: 1px solid white;
+     }
+
+     #score {
+     }
     </style>
 
     <script type="text/javascript">
@@ -64,6 +81,11 @@
 
   <button onclick='stopAll()'>Stop playing</button>
 </div>
-<div id="score"></div>
+<table id="score">
+    <tr>
+        <td id="left_column_cell"></td>
+        <td id="right_column_cell"></td>
+    </tr>
+</table>
 </body>
 </html>

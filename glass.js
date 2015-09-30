@@ -19,11 +19,11 @@ function Score(timeSig) {
   this.multiSeq = new MultiChannelSequence(this.leftSeq, this.rightSeq);
 }
 
-Score.prototype.play = function(tempo, $scoreDiv) {
+Score.prototype.play = function(tempo, $scoreTable) {
   stopAll();
 
-  $scoreDiv.html("");
-  this.renderIntoDiv($scoreDiv);
+  $scoreTable.find("td").html('');
+  this.renderIntoTable($scoreTable);
 
   var leftNoteStream = this.leftSeq.generateNoteStream();
   var rightNoteStream = this.rightSeq.generateNoteStream();
@@ -46,7 +46,7 @@ function Pattern() {
 
 function NoteStream() {
   this.notes = [];
-  this.currentPatternId = "";
+  this.currentPatternId = '';
 }
 
 NoteStream.prototype.push = function(x) {
@@ -91,7 +91,7 @@ function PatternInstance(repeats, pattern, noteBase, scaleType, options) {
   // A mapping of notes, for inversions.  Key: orig note num.  Val: new note num.
   this.noteMap = null;
 
-  this.id = "p" + ("" + Math.random()).substring(2);
+  this.id = 'p' + ('' + Math.random()).substring(2);
 
   this.noteSet = this.gatherNoteSet();
 }
@@ -230,25 +230,25 @@ function noteLenToMs(tempo, noteLen) {
    the ABC unit is an eighth note. */
 function noteLenToABC(abcNote, noteLen) {
   if (noteLen == 4) {
-    return abcNote + "2";
+    return abcNote + '2';
   } else if (noteLen == 8) {
     return abcNote;
   } else if (noteLen == 1) {
-    return abcNote + "8";
+    return abcNote + '8';
   } else if (noteLen == 45) {
-    return abcNote + "3";
+    return abcNote + '3';
   } else if (noteLen == 30) {
-    return abcNote + "6";
+    return abcNote + '6';
   } else if (noteLen == 2) {
-    return abcNote + "4";
+    return abcNote + '4';
   } else if (noteLen == 3) {
-    return "(3" + abcNote;
+    return '(3' + abcNote;
   } else if (noteLen == 5) {
-    return "(5" + abcNote;
+    return '(5' + abcNote;
   } else if (noteLen == 6) {
-    return "(6" + abcNote;
+    return '(6' + abcNote;
   } else if (noteLen == 7) {
-    return "(7" + abcNote;
+    return '(7' + abcNote;
   }
 }
 
@@ -358,9 +358,9 @@ MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patte
 };
 
 Sequence.prototype.renderIntoDiv = function($div) {
-  var $sub = $("<div>").css("border-left", "1px solid silver").css("padding", "8px").css("margin", "8px");
+  var $sub = $('<div>').css('border-left', '1px solid silver').css('padding', '8px').css('margin', '8px');
   $div.append($sub);
-  $sub.append($("<div>").text("x" + this.repeats).css("font-style", "italic"));
+  $sub.append($('<div>').text('x' + this.repeats).css('font-style', 'italic'));
   for (var i = 0; i < this.items.length; i++) {
     var item = this.items[i];
     if (item.type == PATTERN_INSTANCE) {
@@ -371,32 +371,32 @@ Sequence.prototype.renderIntoDiv = function($div) {
         continue;
       }
 
-      var $notationParent = $("<div>").css("height", "80px").css("width", "300px").
-        attr("id", patternInstance.id).addClass("patternInstance");
-      var $notation = $("<div>");
+      var $notationParent = $('<div>').css('height', '80px').css('width', '300px').
+        attr('id', patternInstance.id).addClass('patternInstance').attr('seq', i);
+      var $notation = $('<div>');
       $notationParent.append($notation);
       $sub.append($notationParent);
 
-      var header = "M:none\n%%staves P1\nV:P1" ;// name=\"x" + patternInstance.repeats + "\"";
+      var header = 'M:none\n%%staves P1\nV:P1' ;// name=\'x' + patternInstance.repeats + '\"";
 
       // Decide whether to display in bass clef.
       if (patternInstance.noteSet[0] <= 55 /* low G */ ||
           patternInstance.noteSet[patternInstance.noteSet.length - 1] < 60 /* mid C */) {
-        header += " clef=bass ";
+        header += ' clef=bass ';
       }
-      header += "\n";
+      header += '\n';
       var abc = header + patternInstance.toABC();
 
       var engraverParams = {
-        "scale": .8,
-        "staffwidth": 300,
-        "paddingtop": -20,
-        "paddingbottom": 0,
-        "paddingleft": 0,
-        "paddingright": 0
+        'scale': .8,
+        'staffwidth': 300,
+        'paddingtop': -20,
+        'paddingbottom': 0,
+        'paddingleft': 0,
+        'paddingright': 0
       };
       ABCJS.renderAbc($notation.get(0), abc, null, engraverParams);
-      $sub.append($("<div>").text(patternInstance.octaveStart));
+      $sub.append($('<div>').text(patternInstance.octaveStart));
 
     } else if (item.type == SEQUENCE) {
       item.item.renderIntoDiv($sub);
@@ -404,15 +404,25 @@ Sequence.prototype.renderIntoDiv = function($div) {
   }
 };
 
-Score.prototype.renderIntoDiv = function($div) {
-  var $leftDiv = $("<div>").attr("id", "leftNotation").css("margin", "8px").css("padding", "8px").text("Left");
-  var $rightDiv = $("<div>").attr("id", "rightNotation").css("margin", "8px").css("padding", "8px").text("Right");
+Score.prototype.renderIntoTable = function($table) {
+  var $leftDiv = $('<div>').attr('id', 'left_column').css('margin', '8px').css('padding', '8px');
+  var $rightDiv = $('<div>').attr('id', 'right_column').css('margin', '8px').css('padding', '8px');
 
   this.leftSeq.renderIntoDiv($leftDiv);
   this.rightSeq.renderIntoDiv($rightDiv);
 
-  $div.append($leftDiv);
-  $div.append($rightDiv);
+  $table.find("#left_column_cell").append($leftDiv);
+  $table.find("#right_column_cell").append($rightDiv);
+
+  var resize = function() {
+    var top = $leftDiv.position().top;
+    var newHeight = ($(window).height() - top - 48) + 'px';
+    $leftDiv.css('height', newHeight);
+    $rightDiv.css('height', newHeight);
+  }
+
+  $(window).resize(resize);
+  resize();
 };
 
 Sequence.prototype.generateNoteStream = function() {
@@ -487,12 +497,12 @@ function noteStringToNum(noteString, octaveOffset) {
   var flatNote = noteStringToFlat[noteString];
   var baseOctave = 5;
   var octave = baseOctave + octaveOffset;
-  var finalNoteString = "" + flatNote + octave;
+  var finalNoteString = '' + flatNote + octave;
   return MIDI.keyToNote[finalNoteString];
 }
 
 function midiNoteToABC(note) {
-  // This returns "A4", "C5", ...
+  // This returns 'A4', 'C5', ...
   var encoded = MIDI.noteToKey[note];
 
   var octave = parseInt(encoded[encoded.length - 1]);
@@ -522,7 +532,7 @@ function midiNoteToABC(note) {
 PatternInstance.prototype.toABC = function() {
   var noteStream = this.generateNoteStream(false);
 
-  var abc = "";
+  var abc = '';
   var s = [];
 
   var isFirstNote = true;
@@ -591,7 +601,7 @@ PatternInstance.prototype.toABC = function() {
   }
   s.push('|');
 
-  abc += s.join("");
+  abc += s.join('');
 
   return abc;
 };
@@ -675,8 +685,8 @@ function testCalculateNoteSetDifference() {
 // Delay the timeouts by a constant time to allow initial setup to complete.
 // TODO: is this helpful?
 var DELAY_START_OFFSET = 100;
-var lastLeftPatternId = "";
-var lastRightPatternId = "";
+var lastLeftPatternId = '';
+var lastRightPatternId = '';
 
 // All setTimeout() handles.
 var allTimeouts = [];
@@ -700,16 +710,16 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
     }
 
     if (patternId != noteStream.currentPatternId) {
-      if (noteStream.currentPatternId != "") {
+      if (noteStream.currentPatternId != '') {
         // Hide old highlight.
-        $("#" + noteStream.currentPatternId).css("border-left", "1px solid white");
-        $("#" + noteStream.currentPatternId).css("background-color", "white");
+        $('#' + noteStream.currentPatternId).css('border-left', '1px solid white');
+        $('#' + noteStream.currentPatternId).css('background-color', 'white');
       }
       // Highlight new.
-      var highlightId = "#" + patternId;
-      $(highlightId).css("border-left", "1px solid white");
-      $(highlightId).css("background-color", "#B2C6E0"); //"#f0f0ff");
-      $(highlightId).scrollintoview();
+      var highlightId = '#' + patternId;
+      $(highlightId).css('border-left', '1px solid white');
+      $(highlightId).css('background-color', '#B2C6E0'); //'#f0f0ff');
+      $(highlightId).get(0).scrollIntoView({behavior:'smooth'});
 
       noteStream.currentPatternId = patternId;
     }
@@ -751,3 +761,21 @@ function invert12(notes, direction) {
   return notes;
 }
 
+/*
+function resizeScore() {
+  var top = $("#score").position().top;
+  var newHeight = ($(window).height() - top - 8) + 'px';
+  $('#left_column').css('height', newHeight);
+  $('#right_column').css('height', newHeight);
+
+  console.log($(window).height(), top, newHeight);
+}
+
+$(window).resize(function() {
+  resizeScore();
+});
+
+$(function() {
+  setTimeout(resizeScore, 0);
+});
+*/
