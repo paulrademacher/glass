@@ -358,9 +358,12 @@ MultiChannelSequence.prototype.addPattern = function(repeats, patternLeft, patte
 };
 
 Sequence.prototype.renderIntoDiv = function($div) {
-  var $sub = $('<div>').css('border-left', '1px solid silver').css('padding', '8px').css('margin', '8px');
+  var $sub = $('<div>').css('border-left', '6px solid #dddddd').css('padding', '8px').css('margin', '8px 8px 8px 0');
   $div.append($sub);
-  $sub.append($('<div>').text('x' + this.repeats).css('font-style', 'italic'));
+
+  if (false) { // Don't show X1, X2, etc for repeats
+    $sub.append($('<div>').text('x' + this.repeats).css('font-style', 'italic'));
+  }
   for (var i = 0; i < this.items.length; i++) {
     var item = this.items[i];
     if (item.type == PATTERN_INSTANCE) {
