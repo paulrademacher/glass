@@ -1,5 +1,8 @@
 var muted = false;
 
+var staffWidth = 380;
+var staffMargin = 10;
+
 function Note(len, nums, patternInstanceId) {
   this.len = len;
 
@@ -374,7 +377,7 @@ Sequence.prototype.renderIntoDiv = function($div) {
         continue;
       }
 
-      var $notationParent = $('<div>').css('height', '80px').css('width', '300px').
+      var $notationParent = $('<div>').css('height', '130px').css('width', '' + (staffWidth + staffMargin*2) + 'px').
         attr('id', patternInstance.id).addClass('patternInstance').attr('seq', i);
       var $notation = $('<div>');
       $notationParent.append($notation);
@@ -391,12 +394,12 @@ Sequence.prototype.renderIntoDiv = function($div) {
       var abc = header + patternInstance.toABC();
 
       var engraverParams = {
-        'scale': .8,
-        'staffwidth': 300,
-        'paddingtop': -20,
+        'scale': 1.0,
+        'staffwidth': staffWidth,
+        'paddingtop': 20,
         'paddingbottom': 0,
-        'paddingleft': 0,
-        'paddingright': 0
+        'paddingleft': staffMargin,
+        'paddingright': staffMargin
       };
       ABCJS.renderAbc($notation.get(0), abc, null, engraverParams);
       $sub.append($('<div>').text(patternInstance.octaveStart));
@@ -722,7 +725,10 @@ function playNote(note, time, len, velocity, noteStream, patternId) {
       var highlightId = '#' + patternId;
       $(highlightId).css('border-left', '1px solid white');
       $(highlightId).css('background-color', '#B2C6E0'); //'#f0f0ff');
-      $(highlightId).get(0).scrollIntoView({behavior:'smooth'});
+
+      if ($(highlightId).get(0)) {
+        $(highlightId).get(0).scrollIntoView({behavior:'smooth'});
+      }
 
       noteStream.currentPatternId = patternId;
     }
